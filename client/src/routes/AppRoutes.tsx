@@ -11,7 +11,10 @@ import {
   ProductListPage,
   ProductFormPage,
   ProductDetailPage,
-  InventoryPage
+  InventoryPage,
+  ChallanListPage,
+  ChallanFormPage,
+  ChallanDetailPage
 } from '../pages';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -172,11 +175,53 @@ export const AppRoutes: React.FC = () => {
         }
       />
 
+      {/* Sales Challan Module Routes */}
+      <Route
+        path="/challans"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ChallanListPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/challans/new"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ChallanFormPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/challans/:id"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ChallanDetailPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/challans/:id/edit"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ChallanFormPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Root redirection */}
       <Route
         path="/"
         element={
-          isAuthenticated ? <Navigate to="/inventory" replace /> : <Navigate to="/login" replace />
+          isAuthenticated ? <Navigate to="/challans" replace /> : <Navigate to="/login" replace />
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />

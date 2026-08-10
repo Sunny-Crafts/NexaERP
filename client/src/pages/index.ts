@@ -7,3 +7,6 @@ export * from './products/ProductListPage';
 export * from './products/ProductFormPage';
 export * from './products/ProductDetailPage';
 export * from './inventory/InventoryPage';
+export * from './challans/ChallanListPage';
+export * from './challans/ChallanFormPage';
+export * from './challans/ChallanDetailPage';

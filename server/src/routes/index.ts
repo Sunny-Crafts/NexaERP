@@ -3,6 +3,7 @@ import authRoutes from './auth.routes';
 import customerRoutes from './customer.routes';
 import productRoutes from './product.routes';
 import inventoryRoutes from './inventory.routes';
+import challanRoutes from './challan.routes';
 
 const router = Router();
 
@@ -25,5 +26,8 @@ router.use('/products', productRoutes);
 
 // Inventory & Stock Movement routes (/api/inventory)
 router.use('/inventory', inventoryRoutes);
+
+// Sales Challan routes (/api/challans)
+router.use('/challans', challanRoutes);
 
 export default router;

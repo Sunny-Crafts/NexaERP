@@ -68,7 +68,7 @@
           "response": []
         },
         {
-          "name": "Login - Warehouse",
+          "name": "Login - Sales",
           "event": [
             {
               "listen": "test",
@@ -95,19 +95,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"warehouse@nexaerp.com\",\n  \"password\": \"Warehouse@123\"\n}"
+              "raw": "{\n  \"email\": \"sales@nexaerp.com\",\n  \"password\": \"Sales@123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "login"]
             },
-            "description": "Login as WAREHOUSE user"
+            "description": "Login as SALES user"
           },
           "response": []
         },
         {
-          "name": "Login - Sales",
+          "name": "Login - Warehouse",
           "request": {
             "method": "POST",
             "header": [
@@ -118,14 +118,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"sales@nexaerp.com\",\n  \"password\": \"Sales@123\"\n}"
+              "raw": "{\n  \"email\": \"warehouse@nexaerp.com\",\n  \"password\": \"Warehouse@123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "login"]
             },
-            "description": "Login as SALES user"
+            "description": "Login as WAREHOUSE user"
           },
           "response": []
         },
@@ -226,69 +226,6 @@
             "description": "List products with pagination"
           },
           "response": []
-        },
-        {
-          "name": "Search Products",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products?search=Mouse",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"],
-              "query": [
-                { "key": "search", "value": "Mouse" }
-              ]
-            },
-            "description": "Search products by name, SKU, or category"
-          },
-          "response": []
-        },
-        {
-          "name": "Filter Low-Stock Products",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products?lowStock=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"],
-              "query": [
-                { "key": "lowStock", "value": "true" }
-              ]
-            },
-            "description": "Filter products where currentStock <= minimumStock"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Product Categories",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products/categories",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "categories"]
-            },
-            "description": "Get distinct product categories"
-          },
-          "response": []
         }
       ]
     },
@@ -310,12 +247,17 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "inventory", "summary"]
             },
-            "description": "Get summary cards metrics (totalProducts, lowStockProducts, outOfStockProducts, totalStockUnits)"
+            "description": "Get summary cards metrics"
           },
           "response": []
-        },
+        }
+      ]
+    },
+    {
+      "name": "Sales Challans",
+      "item": [
         {
-          "name": "List Stock Movements (Paginated)",
+          "name": "List Challans (Paginated)",
           "request": {
             "method": "GET",
             "header": [
@@ -325,20 +267,36 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/inventory/movements?page=1&limit=10",
+              "raw": "{{baseUrl}}/api/challans?page=1&limit=10",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "inventory", "movements"],
+              "path": ["api", "challans"],
               "query": [
                 { "key": "page", "value": "1" },
                 { "key": "limit", "value": "10" }
               ]
             },
-            "description": "List chronological stock movements"
+            "description": "List sales challans with customer info"
           },
           "response": []
         },
         {
-          "name": "Record Stock IN Movement",
+          "name": "Create Draft Challan (Admin/Sales)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.challan && jsonData.data.challan.id) {",
+                  "        pm.collectionVariables.set('challanId', jsonData.data.challan.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -353,68 +311,71 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 20,\n  \"type\": \"IN\",\n  \"reason\": \"New batch shipment received from supplier\"\n}"
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/inventory/movements",
+              "raw": "{{baseUrl}}/api/challans",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "inventory", "movements"]
+              "path": ["api", "challans"]
             },
-            "description": "Add stock IN atomically via transaction"
+            "description": "Create a new Sales Challan draft"
           },
           "response": []
         },
         {
-          "name": "Record Stock OUT Movement",
+          "name": "Get Challan Detail",
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 5,\n  \"type\": \"OUT\",\n  \"reason\": \"Quality inspection & damage write-off\"\n}"
-            },
             "url": {
-              "raw": "{{baseUrl}}/api/inventory/movements",
+              "raw": "{{baseUrl}}/api/challans/{{challanId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "inventory", "movements"]
+              "path": ["api", "challans", "{{challanId}}"]
             },
-            "description": "Deduct stock OUT atomically via transaction"
+            "description": "Get single challan with product snapshots"
           },
           "response": []
         },
         {
-          "name": "Stock OUT - Insufficient Stock Test (409 Error)",
+          "name": "Confirm Challan (Atomic Stock Deduction)",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 999999,\n  \"type\": \"OUT\",\n  \"reason\": \"Excessive deduction test\"\n}"
-            },
             "url": {
-              "raw": "{{baseUrl}}/api/inventory/movements",
+              "raw": "{{baseUrl}}/api/challans/{{challanId}}/confirm",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "inventory", "movements"]
+              "path": ["api", "challans", "{{challanId}}", "confirm"]
             },
-            "description": "Verify rollback and 409 response when requested OUT > currentStock"
+            "description": "Confirm challan and deduct inventory atomically"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Draft Challan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/challans/{{challanId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "challans", "{{challanId}}", "cancel"]
+            },
+            "description": "Cancel a draft challan"
           },
           "response": []
         }
@@ -439,6 +400,11 @@
     },
     {
       "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "challanId",
       "value": "",
       "type": "string"
     }
