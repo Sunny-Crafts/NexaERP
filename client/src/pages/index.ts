@@ -10,3 +10,4 @@ export * from './inventory/InventoryPage';
 export * from './challans/ChallanListPage';
 export * from './challans/ChallanFormPage';
 export * from './challans/ChallanDetailPage';
+export * from './dashboard/DashboardPage';

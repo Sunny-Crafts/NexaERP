@@ -5,6 +5,7 @@ import { AppLayout } from '../layouts/AppLayout';
 import { 
   LoginPage, 
   AuthDemoPage, 
+  DashboardPage,
   CustomerListPage, 
   CustomerFormPage, 
   CustomerDetailPage,
@@ -56,6 +57,18 @@ export const AppRoutes: React.FC = () => {
     <Routes>
       {/* Public Login Route */}
       <Route path="/login" element={<LoginPage />} />
+
+      {/* Operations Dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <DashboardPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Auth & RBAC Testing Page */}
       <Route
@@ -217,14 +230,14 @@ export const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* Root redirection */}
+      {/* Root redirection to Dashboard */}
       <Route
         path="/"
         element={
-          isAuthenticated ? <Navigate to="/challans" replace /> : <Navigate to="/login" replace />
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 };

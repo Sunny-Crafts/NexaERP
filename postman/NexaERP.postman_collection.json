@@ -68,91 +68,6 @@
           "response": []
         },
         {
-          "name": "Login - Sales",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    if (jsonData.data && jsonData.data.token) {",
-                  "        pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    }",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"sales@nexaerp.com\",\n  \"password\": \"Sales@123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "login"]
-            },
-            "description": "Login as SALES user"
-          },
-          "response": []
-        },
-        {
-          "name": "Login - Warehouse",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"warehouse@nexaerp.com\",\n  \"password\": \"Warehouse@123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "login"]
-            },
-            "description": "Login as WAREHOUSE user"
-          },
-          "response": []
-        },
-        {
-          "name": "Login - Accounts",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"accounts@nexaerp.com\",\n  \"password\": \"Accounts@123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "login"]
-            },
-            "description": "Login as ACCOUNTS user"
-          },
-          "response": []
-        },
-        {
           "name": "Get Current User Profile (/me)",
           "request": {
             "method": "GET",
@@ -168,6 +83,96 @@
               "path": ["api", "auth", "me"]
             },
             "description": "Get profile of the currently authenticated user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "stats"]
+            },
+            "description": "Get aggregated counts for customers, products, inventory units, and challans"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Sales Challans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/recent-challans?limit=6",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "recent-challans"],
+              "query": [
+                { "key": "limit", "value": "6" }
+              ]
+            },
+            "description": "Get latest sales challans for dashboard widget"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Stock Movements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/recent-stock-movements?limit=6",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "recent-stock-movements"],
+              "query": [
+                { "key": "limit", "value": "6" }
+              ]
+            },
+            "description": "Get latest inventory stock movements for dashboard ledger widget"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Low-Stock Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/low-stock?limit=8",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "low-stock"],
+              "query": [
+                { "key": "limit", "value": "8" }
+              ]
+            },
+            "description": "Get urgent products below minimum stock threshold"
           },
           "response": []
         }
@@ -278,106 +283,6 @@
             "description": "List sales challans with customer info"
           },
           "response": []
-        },
-        {
-          "name": "Create Draft Challan (Admin/Sales)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    var jsonData = pm.response.json();",
-                  "    if (jsonData.data && jsonData.data.challan && jsonData.data.challan.id) {",
-                  "        pm.collectionVariables.set('challanId', jsonData.data.challan.id);",
-                  "    }",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/challans",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "challans"]
-            },
-            "description": "Create a new Sales Challan draft"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Challan Detail",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/challans/{{challanId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "challans", "{{challanId}}"]
-            },
-            "description": "Get single challan with product snapshots"
-          },
-          "response": []
-        },
-        {
-          "name": "Confirm Challan (Atomic Stock Deduction)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/challans/{{challanId}}/confirm",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "challans", "{{challanId}}", "confirm"]
-            },
-            "description": "Confirm challan and deduct inventory atomically"
-          },
-          "response": []
-        },
-        {
-          "name": "Cancel Draft Challan",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/challans/{{challanId}}/cancel",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "challans", "{{challanId}}", "cancel"]
-            },
-            "description": "Cancel a draft challan"
-          },
-          "response": []
         }
       ]
     }
@@ -390,21 +295,6 @@
     },
     {
       "key": "token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "customerId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "productId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "challanId",
       "value": "",
       "type": "string"
     }
