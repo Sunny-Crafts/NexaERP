@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import authRoutes from './auth.routes';
 import customerRoutes from './customer.routes';
 import productRoutes from './product.routes';
+import inventoryRoutes from './inventory.routes';
 
 const router = Router();
 
@@ -21,5 +22,8 @@ router.use('/customers', customerRoutes);
 
 // Product Management routes (/api/products)
 router.use('/products', productRoutes);
+
+// Inventory & Stock Movement routes (/api/inventory)
+router.use('/inventory', inventoryRoutes);
 
 export default router;

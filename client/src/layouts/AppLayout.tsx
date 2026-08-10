@@ -95,6 +95,23 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             </NavLink>
 
             <NavLink
+              to="/inventory"
+              className={({ isActive }) =>
+                `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  isActive
+                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`
+              }
+            >
+              <div className="flex items-center gap-2.5">
+                <Boxes className="w-4 h-4 text-emerald-400" />
+                <span>Inventory & Stock</span>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+            </NavLink>
+
+            <NavLink
               to="/demo"
               className={({ isActive }) =>
                 `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
@@ -113,14 +130,6 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
             <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 pt-4 pb-1">
               Upcoming Modules
-            </div>
-
-            <div className="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs text-slate-600 cursor-not-allowed">
-              <div className="flex items-center gap-2.5">
-                <Boxes className="w-4 h-4" />
-                <span>Inventory & Stock</span>
-              </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-500 font-mono">Soon</span>
             </div>
 
             <div className="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs text-slate-600 cursor-not-allowed">

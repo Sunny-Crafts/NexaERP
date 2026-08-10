@@ -198,28 +198,6 @@
             "description": "List customers with pagination"
           },
           "response": []
-        },
-        {
-          "name": "Search Customers",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/customers?search=Apex",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "customers"],
-              "query": [
-                { "key": "search", "value": "Apex" }
-              ]
-            },
-            "description": "Search customers"
-          },
-          "response": []
         }
       ]
     },
@@ -311,79 +289,14 @@
             "description": "Get distinct product categories"
           },
           "response": []
-        },
+        }
+      ]
+    },
+    {
+      "name": "Inventory & Stock",
+      "item": [
         {
-          "name": "Create Product (Admin/Warehouse)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    var jsonData = pm.response.json();",
-                  "    if (jsonData.data && jsonData.data.product && jsonData.data.product.id) {",
-                  "        pm.collectionVariables.set('productId', jsonData.data.product.id);",
-                  "    }",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Bluetooth Ergonomic Headset\",\n  \"sku\": \"AUD-HD-006\",\n  \"category\": \"Audio\",\n  \"unitPrice\": 1899.00,\n  \"currentStock\": 60,\n  \"minimumStock\": 15,\n  \"warehouseLocation\": \"Rack D-02\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"]
-            },
-            "description": "Create a new product (Admin/Warehouse only)"
-          },
-          "response": []
-        },
-        {
-          "name": "Create Product - Duplicate SKU (409 Conflict Test)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Duplicate SKU Test Product\",\n  \"sku\": \"MOU-WL-001\",\n  \"category\": \"Peripherals\",\n  \"unitPrice\": 999.00,\n  \"currentStock\": 10,\n  \"minimumStock\": 5,\n  \"warehouseLocation\": \"Rack A-01\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"]
-            },
-            "description": "Verify 409 Conflict on duplicate SKU"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Product Detail",
+          "name": "Get Inventory Summary",
           "request": {
             "method": "GET",
             "header": [
@@ -393,18 +306,41 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "raw": "{{baseUrl}}/api/inventory/summary",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "{{productId}}"]
+              "path": ["api", "inventory", "summary"]
             },
-            "description": "Get single product specifications"
+            "description": "Get summary cards metrics (totalProducts, lowStockProducts, outOfStockProducts, totalStockUnits)"
           },
           "response": []
         },
         {
-          "name": "Update Product (Admin/Warehouse)",
+          "name": "List Stock Movements (Paginated)",
           "request": {
-            "method": "PUT",
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/movements?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "movements"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "List chronological stock movements"
+          },
+          "response": []
+        },
+        {
+          "name": "Record Stock IN Movement",
+          "request": {
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
@@ -417,14 +353,68 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Bluetooth Ergonomic Headset v2\",\n  \"unitPrice\": 1999.00,\n  \"minimumStock\": 20,\n  \"warehouseLocation\": \"Rack D-03\"\n}"
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 20,\n  \"type\": \"IN\",\n  \"reason\": \"New batch shipment received from supplier\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "raw": "{{baseUrl}}/api/inventory/movements",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "{{productId}}"]
+              "path": ["api", "inventory", "movements"]
             },
-            "description": "Update product details (preserves currentStock)"
+            "description": "Add stock IN atomically via transaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Record Stock OUT Movement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 5,\n  \"type\": \"OUT\",\n  \"reason\": \"Quality inspection & damage write-off\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/movements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "movements"]
+            },
+            "description": "Deduct stock OUT atomically via transaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Stock OUT - Insufficient Stock Test (409 Error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 999999,\n  \"type\": \"OUT\",\n  \"reason\": \"Excessive deduction test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/movements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "movements"]
+            },
+            "description": "Verify rollback and 409 response when requested OUT > currentStock"
           },
           "response": []
         }

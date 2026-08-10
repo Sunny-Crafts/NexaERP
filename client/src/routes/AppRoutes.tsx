@@ -10,7 +10,8 @@ import {
   CustomerDetailPage,
   ProductListPage,
   ProductFormPage,
-  ProductDetailPage
+  ProductDetailPage,
+  InventoryPage
 } from '../pages';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -149,11 +150,33 @@ export const AppRoutes: React.FC = () => {
         }
       />
 
+      {/* Inventory & Stock Movement Module Routes */}
+      <Route
+        path="/inventory"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <InventoryPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inventory/movements"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <InventoryPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Root redirection */}
       <Route
         path="/"
         element={
-          isAuthenticated ? <Navigate to="/products" replace /> : <Navigate to="/login" replace />
+          isAuthenticated ? <Navigate to="/inventory" replace /> : <Navigate to="/login" replace />
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />

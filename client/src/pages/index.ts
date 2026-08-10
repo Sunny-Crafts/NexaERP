@@ -6,3 +6,4 @@ export * from './customers/CustomerDetailPage';
 export * from './products/ProductListPage';
 export * from './products/ProductFormPage';
 export * from './products/ProductDetailPage';
+export * from './inventory/InventoryPage';
