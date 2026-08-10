@@ -1,2 +1,1 @@
-// Application routing configuration
-export {};
+export * from './AppRoutes';

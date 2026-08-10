@@ -1,2 +1,2 @@
-// Validators define input validation schemas
-export {};
+export * from './auth.validator';
+export * from './customer.validator';

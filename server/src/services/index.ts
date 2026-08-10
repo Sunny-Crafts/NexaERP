@@ -1,2 +1,2 @@
-// Services encapsulate core business logic
-export {};
+export * from './auth.service';
+export * from './customer.service';

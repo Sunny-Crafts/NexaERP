@@ -1,2 +1,2 @@
-// Controllers handle HTTP request/response logic
-export {};
+export * as authController from './auth.controller';
+export * as customerController from './customer.controller';

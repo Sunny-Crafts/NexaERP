@@ -1,4 +1,6 @@
 import { Router, Request, Response } from 'express';
+import authRoutes from './auth.routes';
+import customerRoutes from './customer.routes';
 
 const router = Router();
 
@@ -9,5 +11,11 @@ router.get('/health', (_req: Request, res: Response) => {
     message: 'NexaERP API is running'
   });
 });
+
+// Authentication routes (/api/auth)
+router.use('/auth', authRoutes);
+
+// Customer CRM routes (/api/customers)
+router.use('/customers', customerRoutes);
 
 export default router;
