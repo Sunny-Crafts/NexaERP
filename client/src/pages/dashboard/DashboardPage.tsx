@@ -7,8 +7,11 @@ import {
   Boxes, 
   FileText, 
   AlertTriangle, 
+  CheckCircle2, 
+  ArrowUpRight, 
   RefreshCw, 
   PlusCircle, 
+  UserCheck, 
   Calendar
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,7 +19,7 @@ import { dashboardService } from '../../services/dashboardService';
 import { DashboardStats, Challan, StockMovement, Product } from '../../types';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { AlertBanner } from '../../components/common/AlertBanner';
-import { formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, formatDateTime } from '../../utils/formatters';
 
 export const DashboardPage: React.FC = () => {
   const { user, hasRole } = useAuth();
