@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Role } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { generateToken } from '../utils/jwt';
