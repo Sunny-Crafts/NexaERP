@@ -2,12 +2,12 @@
   "info": {
     "_postman_id": "a9c78201-d0b8-4d56-b0e2-1fa904c6eb23",
     "name": "NexaERP API",
-    "description": "API collection for NexaERP - Mini ERP + CRM Operations Portal",
+    "description": "Comprehensive production API collection for NexaERP - Mini ERP + CRM Operations Portal",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "System",
+      "name": "Health",
       "item": [
         {
           "name": "Health Check",
@@ -15,11 +15,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/health",
+              "raw": "{{baseUrl}}/health",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "health"]
+              "path": ["health"]
             },
-            "description": "Health check endpoint for NexaERP backend"
+            "description": "Health check endpoint for NexaERP backend service"
           },
           "response": []
         }
@@ -29,7 +29,7 @@
       "name": "Authentication",
       "item": [
         {
-          "name": "Login - Admin",
+          "name": "Login (Admin)",
           "event": [
             {
               "listen": "test",
@@ -38,7 +38,7 @@
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
                   "    if (jsonData.data && jsonData.data.token) {",
-                  "        pm.collectionVariables.set('token', jsonData.data.token);",
+                  "        pm.environment.set('token', jsonData.data.token);",
                   "    }",
                   "}"
                 ],
@@ -59,16 +59,62 @@
               "raw": "{\n  \"email\": \"admin@nexaerp.com\",\n  \"password\": \"Admin@123\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
+              "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "login"]
+              "path": ["auth", "login"]
             },
-            "description": "Login as ADMIN user"
+            "description": "Login as ADMIN user and auto-set token"
           },
           "response": []
         },
         {
-          "name": "Get Current User Profile (/me)",
+          "name": "Login (Sales)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sales@nexaerp.com\",\n  \"password\": \"Sales@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login as SALES user"
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Warehouse)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"warehouse@nexaerp.com\",\n  \"password\": \"Warehouse@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login as WAREHOUSE user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile (/me)",
           "request": {
             "method": "GET",
             "header": [
@@ -78,11 +124,524 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/me",
+              "raw": "{{baseUrl}}/auth/me",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "me"]
+              "path": ["auth", "me"]
             },
-            "description": "Get profile of the currently authenticated user"
+            "description": "Get currently authenticated user's profile"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers?page=1&limit=10&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" }
+              ]
+            },
+            "description": "List customers with search and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.customer) {",
+                  "        pm.environment.set('customerId', jsonData.data.customer.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aarav Enterprises\",\n  \"mobile\": \"9876543210\",\n  \"email\": \"aarav@enterprises.com\",\n  \"businessName\": \"Aarav Tech Logistics\",\n  \"gstNumber\": \"27AABCU9603R1ZM\",\n  \"customerType\": \"WHOLESALE\",\n  \"address\": \"Industrial Area Phase 2, Mumbai, MH\",\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Key logistics distribution partner\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"]
+            },
+            "description": "Create a new customer (ADMIN & SALES only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "{{customerId}}"]
+            },
+            "description": "Get customer by ID along with follow-ups"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aarav Enterprises Private Limited\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "{{customerId}}"]
+            },
+            "description": "Update customer details (ADMIN & SALES only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Customer Follow-up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Discussed Q3 inventory replenishment agreement.\",\n  \"followUpDate\": \"2026-08-25T10:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/{{customerId}}/followups",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "{{customerId}}", "followups"]
+            },
+            "description": "Record a customer follow-up interaction (ADMIN & SALES only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=1&limit=10&search=&stockStatus=ALL",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "stockStatus", "value": "ALL" }
+              ]
+            },
+            "description": "List products with search, category, and stock filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "categories"]
+            },
+            "description": "Get distinct product categories list"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.product) {",
+                  "        pm.environment.set('productId', jsonData.data.product.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ultra HD 4K Monitor 27-inch\",\n  \"sku\": \"MON-4K-027\",\n  \"category\": \"Displays\",\n  \"unitPrice\": 24999.00,\n  \"currentStock\": 25,\n  \"minimumStock\": 5,\n  \"warehouseLocation\": \"Bay C-04\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Create a new product in the catalog (ADMIN & WAREHOUSE only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            },
+            "description": "Get product specifications by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitPrice\": 23999.00,\n  \"minimumStock\": 8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            },
+            "description": "Update product specifications (ADMIN & WAREHOUSE only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "Get Inventory Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "summary"]
+            },
+            "description": "Get overall inventory summary KPIs and counts"
+          },
+          "response": []
+        },
+        {
+          "name": "List Stock Movements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/movements?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "movements"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "List audit history of stock IN and OUT ledger movements"
+          },
+          "response": []
+        },
+        {
+          "name": "Record Stock Movement (IN / OUT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"type\": \"IN\",\n  \"quantity\": 10,\n  \"reason\": \"Supplier purchase delivery shipment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventory/movements",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "movements"]
+            },
+            "description": "Record an atomic stock adjustment (ADMIN & WAREHOUSE only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Challans",
+      "item": [
+        {
+          "name": "List Sales Challans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans?page=1&limit=10&status=ALL",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "ALL" }
+              ]
+            },
+            "description": "List sales challans with customer info and status"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Sales Challan (Draft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.challan) {",
+                  "        pm.environment.set('challanId', jsonData.data.challan.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/challans",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans"]
+            },
+            "description": "Create a DRAFT sales challan capturing product snapshots (ADMIN & SALES only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Challan Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans/{{challanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans", "{{challanId}}"]
+            },
+            "description": "Get challan document details including historical snapshots"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Challan Draft",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 3\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/challans/{{challanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans", "{{challanId}}"]
+            },
+            "description": "Update DRAFT challan line items (ADMIN & SALES only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Sales Challan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans/{{challanId}}/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans", "{{challanId}}", "confirm"]
+            },
+            "description": "Atomically confirm challan, deduct stock, and write StockMovement OUT (ADMIN & SALES only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Sales Challan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans/{{challanId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans", "{{challanId}}", "cancel"]
+            },
+            "description": "Cancel a DRAFT sales challan (ADMIN & SALES only)"
           },
           "response": []
         }
@@ -102,16 +661,16 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/dashboard/stats",
+              "raw": "{{baseUrl}}/dashboard/stats",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "dashboard", "stats"]
+              "path": ["dashboard", "stats"]
             },
-            "description": "Get aggregated counts for customers, products, inventory units, and challans"
+            "description": "Get live aggregated KPI stats directly from database"
           },
           "response": []
         },
         {
-          "name": "Get Recent Sales Challans",
+          "name": "Get Recent Challans",
           "request": {
             "method": "GET",
             "header": [
@@ -121,9 +680,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/dashboard/recent-challans?limit=6",
+              "raw": "{{baseUrl}}/dashboard/recent-challans?limit=6",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "dashboard", "recent-challans"],
+              "path": ["dashboard", "recent-challans"],
               "query": [
                 { "key": "limit", "value": "6" }
               ]
@@ -143,14 +702,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/dashboard/recent-stock-movements?limit=6",
+              "raw": "{{baseUrl}}/dashboard/recent-stock-movements?limit=6",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "dashboard", "recent-stock-movements"],
+              "path": ["dashboard", "recent-stock-movements"],
               "query": [
                 { "key": "limit", "value": "6" }
               ]
             },
-            "description": "Get latest inventory stock movements for dashboard ledger widget"
+            "description": "Get latest inventory movements for ledger stream widget"
           },
           "response": []
         },
@@ -165,9 +724,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/dashboard/low-stock?limit=8",
+              "raw": "{{baseUrl}}/dashboard/low-stock?limit=8",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "dashboard", "low-stock"],
+              "path": ["dashboard", "low-stock"],
               "query": [
                 { "key": "limit", "value": "8" }
               ]
@@ -177,125 +736,12 @@
           "response": []
         }
       ]
-    },
-    {
-      "name": "Customers",
-      "item": [
-        {
-          "name": "List Customers (Paginated)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/customers?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "customers"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" }
-              ]
-            },
-            "description": "List customers with pagination"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Products",
-      "item": [
-        {
-          "name": "List Products (Paginated)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" }
-              ]
-            },
-            "description": "List products with pagination"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Inventory & Stock",
-      "item": [
-        {
-          "name": "Get Inventory Summary",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/inventory/summary",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "inventory", "summary"]
-            },
-            "description": "Get summary cards metrics"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Sales Challans",
-      "item": [
-        {
-          "name": "List Challans (Paginated)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/challans?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "challans"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" }
-              ]
-            },
-            "description": "List sales challans with customer info"
-          },
-          "response": []
-        }
-      ]
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:5000",
-      "type": "string"
-    },
-    {
-      "key": "token",
-      "value": "",
+      "value": "http://localhost:5000/api",
       "type": "string"
     }
   ]

@@ -4,7 +4,6 @@ import { useAuth } from '../hooks/useAuth';
 import { AppLayout } from '../layouts/AppLayout';
 import { 
   LoginPage, 
-  AuthDemoPage, 
   DashboardPage,
   CustomerListPage, 
   CustomerFormPage, 
@@ -65,18 +64,6 @@ export const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AppLayout>
               <DashboardPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Auth & RBAC Testing Page */}
-      <Route
-        path="/demo"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <AuthDemoPage />
             </AppLayout>
           </ProtectedRoute>
         }
