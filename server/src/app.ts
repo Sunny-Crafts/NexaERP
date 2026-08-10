@@ -6,9 +6,14 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app: Application = express();
 
+// Parse CORS origin(s) from environment variable
+const allowedOrigins = config.corsOrigin.includes(',')
+  ? config.corsOrigin.split(',').map((origin) => origin.trim())
+  : config.corsOrigin;
+
 // Middlewares
 app.use(cors({
-  origin: config.corsOrigin,
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
