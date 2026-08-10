@@ -7,7 +7,10 @@ import {
   AuthDemoPage, 
   CustomerListPage, 
   CustomerFormPage, 
-  CustomerDetailPage 
+  CustomerDetailPage,
+  ProductListPage,
+  ProductFormPage,
+  ProductDetailPage
 } from '../pages';
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -104,11 +107,53 @@ export const AppRoutes: React.FC = () => {
         }
       />
 
+      {/* Product Management Module Routes */}
+      <Route
+        path="/products"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ProductListPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/products/new"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ProductFormPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/products/:id"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ProductDetailPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/products/:id/edit"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ProductFormPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Root redirection */}
       <Route
         path="/"
         element={
-          isAuthenticated ? <Navigate to="/customers" replace /> : <Navigate to="/login" replace />
+          isAuthenticated ? <Navigate to="/products" replace /> : <Navigate to="/login" replace />
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />

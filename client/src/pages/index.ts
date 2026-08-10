@@ -3,3 +3,6 @@ export * from './AuthDemoPage';
 export * from './customers/CustomerListPage';
 export * from './customers/CustomerFormPage';
 export * from './customers/CustomerDetailPage';
+export * from './products/ProductListPage';
+export * from './products/ProductFormPage';
+export * from './products/ProductDetailPage';
