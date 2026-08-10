@@ -1,0 +1,182 @@
+// Prisma schema for NexaERP — Mini ERP + CRM Operations Portal
+// Database Provider: Supabase PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// --------------------------------------------------------
+// ENUMS
+// --------------------------------------------------------
+
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+enum StockMovementType {
+  IN
+  OUT
+}
+
+enum ChallanStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+// --------------------------------------------------------
+// MODELS
+// --------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  customerFollowUps CustomerFollowUp[]
+  stockMovements    StockMovement[]
+  challans          Challan[]
+
+  @@map("users")
+}
+
+model Customer {
+  id           String         @id @default(uuid())
+  name         String
+  mobile       String
+  email        String?
+  businessName String?
+  gstNumber    String?
+  customerType CustomerType   @default(RETAIL)
+  address      String?
+  status       CustomerStatus @default(LEAD)
+  followUpDate DateTime?
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  // Relationships
+  followUps CustomerFollowUp[]
+  challans  Challan[]
+
+  @@map("customers")
+}
+
+model CustomerFollowUp {
+  id           String   @id @default(uuid())
+  customerId   String
+  note         String
+  followUpDate DateTime
+  createdBy    String
+  createdAt    DateTime @default(now())
+
+  // Relationships
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([customerId])
+  @@index([createdBy])
+  @@map("customer_follow_ups")
+}
+
+model Product {
+  id                String   @id @default(uuid())
+  name              String
+  sku               String   @unique
+  category          String
+  unitPrice         Decimal  @db.Decimal(10, 2)
+  currentStock      Int      @default(0)
+  minimumStock      Int      @default(0)
+  warehouseLocation String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  stockMovements StockMovement[]
+  challanItems   ChallanItem[]
+
+  @@map("products")
+}
+
+model StockMovement {
+  id        String            @id @default(uuid())
+  productId String
+  quantity  Int
+  type      StockMovementType
+  reason    String?
+  createdBy String
+  createdAt DateTime          @default(now())
+
+  // Relationships
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  user    User    @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([createdBy])
+  @@map("stock_movements")
+}
+
+model Challan {
+  id            String        @id @default(uuid())
+  challanNumber String        @unique
+  customerId    String
+  totalQuantity Int           @default(0)
+  status        ChallanStatus @default(DRAFT)
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relationships
+  customer Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  user     User          @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  items    ChallanItem[]
+
+  @@index([customerId])
+  @@index([createdBy])
+  @@map("challans")
+}
+
+model ChallanItem {
+  id                  String   @id @default(uuid())
+  challanId           String
+  productId           String
+  productNameSnapshot String
+  skuSnapshot         String
+  unitPriceSnapshot   Decimal  @db.Decimal(10, 2)
+  quantity            Int
+  createdAt           DateTime @default(now())
+
+  // Relationships
+  challan Challan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([challanId])
+  @@index([productId])
+  @@map("challan_items")
+}

@@ -1,0 +1,22 @@
+{
+  "name": "nexa-erp-crm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NexaERP — Mini ERP + CRM Operations Portal",
+  "scripts": {
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build:client": "npm --prefix client run build",
+    "build:server": "npm --prefix server run build",
+    "install:all": "npm install && npm --prefix client install && npm --prefix server install"
+  },
+  "keywords": [
+    "erp",
+    "crm",
+    "react",
+    "express",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC"
+}
