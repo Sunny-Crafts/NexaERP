@@ -270,7 +270,7 @@ export const ChallanListPage: React.FC = () => {
                       <div className="flex items-center gap-1.5">
                         <UserCheck className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                         <span className="font-semibold text-slate-200">
-                          {challan.createdBy?.name || challan.user?.name || 'Sales Staff'}
+                          {challan.user?.name || (typeof challan.createdBy === 'string' ? 'Sales Staff' : (challan.createdBy as { name?: string })?.name || 'Sales Staff')}
                         </span>
                       </div>
                     </td>

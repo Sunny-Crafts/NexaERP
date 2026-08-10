@@ -1,33 +1,44 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle2, X } from 'lucide-react';
 
-interface ConfirmDialogProps {
+export interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
-  description: string | React.ReactNode;
+  description?: string | React.ReactNode;
+  message?: string | React.ReactNode;
   confirmText?: string;
   cancelText?: string;
-  confirmVariant?: 'primary' | 'danger' | 'success';
+  confirmVariant?: 'primary' | 'danger' | 'success' | string;
+  variant?: 'primary' | 'danger' | 'success' | string;
   isLoading?: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
+  error?: string;
+  onConfirm: () => void | Promise<void>;
+  onCancel?: () => void;
+  onClose?: () => void;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   title,
   description,
+  message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  confirmVariant = 'primary',
+  confirmVariant,
+  variant = 'primary',
   isLoading = false,
+  error,
   onConfirm,
-  onCancel
+  onCancel,
+  onClose
 }) => {
   if (!isOpen) return null;
 
+  const activeVariant = confirmVariant || variant;
+  const handleClose = onCancel || onClose || (() => {});
+
   const getConfirmButtonClasses = () => {
-    switch (confirmVariant) {
+    switch (activeVariant) {
       case 'danger':
         return 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white';
       case 'success':
@@ -43,9 +54,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-fadeIn">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
-            {confirmVariant === 'danger' ? (
+            {activeVariant === 'danger' ? (
               <AlertTriangle className="w-5 h-5 text-rose-400" />
-            ) : confirmVariant === 'success' ? (
+            ) : activeVariant === 'success' ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
             ) : (
               <AlertTriangle className="w-5 h-5 text-indigo-400" />
@@ -54,7 +65,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </div>
           <button
             type="button"
-            onClick={onCancel}
+            onClick={handleClose}
             disabled={isLoading}
             className="text-slate-500 hover:text-slate-300 p-1 rounded-lg cursor-pointer"
           >
@@ -62,14 +73,20 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </button>
         </div>
 
+        {error && (
+          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-400 font-medium">
+            {error}
+          </div>
+        )}
+
         <div className="text-xs text-slate-300 space-y-2 leading-relaxed">
-          {description}
+          {description || message}
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={handleClose}
             disabled={isLoading}
             className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer disabled:opacity-50"
           >
