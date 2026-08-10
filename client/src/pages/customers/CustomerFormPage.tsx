@@ -4,8 +4,6 @@ import {
   Users, 
   ArrowLeft, 
   Save, 
-  AlertCircle, 
-  CheckCircle2, 
   Building2, 
   Phone, 
   Mail, 
@@ -17,7 +15,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { customerService } from '../../services/customerService';
-import { CustomerType, CustomerStatus, CreateCustomerInput } from '../../types';
+import { CreateCustomerInput } from '../../types';
+import { AlertBanner } from '../../components/common/AlertBanner';
 
 export const CustomerFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -180,7 +179,7 @@ export const CustomerFormPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 space-y-3">
-        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
         <span className="text-xs font-mono">Loading customer details...</span>
       </div>
     );
@@ -199,14 +198,14 @@ export const CustomerFormPage: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
           <span>{isEditMode ? 'Editing Mode' : 'New Registration'}</span>
         </div>
       </div>
 
       <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2.5">
-          <Users className="w-6 h-6 text-emerald-400" />
+        <h2 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
+          <Users className="w-6 h-6 text-indigo-400" />
           <span>{isEditMode ? 'Edit Customer Profile' : 'Register New Customer'}</span>
         </h2>
         <p className="text-xs text-slate-400">
@@ -218,27 +217,18 @@ export const CustomerFormPage: React.FC = () => {
 
       {/* Alert Banner */}
       {statusBanner && (
-        <div
-          className={`p-4 rounded-xl text-xs flex items-start gap-3 border animate-fadeIn ${
-            statusBanner.type === 'success'
-              ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-              : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-          }`}
-        >
-          {statusBanner.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-          )}
-          <span className="leading-relaxed font-medium">{statusBanner.message}</span>
-        </div>
+        <AlertBanner
+          type={statusBanner.type}
+          message={statusBanner.message}
+          onClose={() => setStatusBanner(null)}
+        />
       )}
 
       {/* Form Container */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Card 1: Core Identification */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <Building2 className="w-4 h-4" />
             <span>Customer & Enterprise Identity</span>
           </div>
@@ -258,7 +248,7 @@ export const CustomerFormPage: React.FC = () => {
                 className={`w-full bg-slate-950/80 border rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                   errors.name
                     ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                    : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                 }`}
               />
               {errors.name && <p className="text-[11px] text-rose-400">{errors.name}</p>}
@@ -278,7 +268,7 @@ export const CustomerFormPage: React.FC = () => {
                 className={`w-full bg-slate-950/80 border rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                   errors.businessName
                     ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                    : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                 }`}
               />
               {errors.businessName && <p className="text-[11px] text-rose-400">{errors.businessName}</p>}
@@ -300,7 +290,7 @@ export const CustomerFormPage: React.FC = () => {
                   className={`w-full bg-slate-950/80 border rounded-xl pl-9 pr-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                     errors.mobile
                       ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                      : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                   }`}
                 />
               </div>
@@ -323,7 +313,7 @@ export const CustomerFormPage: React.FC = () => {
                   className={`w-full bg-slate-950/80 border rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                     errors.email
                       ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                      : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                   }`}
                 />
               </div>
@@ -334,7 +324,7 @@ export const CustomerFormPage: React.FC = () => {
 
         {/* Card 2: Classification & Compliance */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-teal-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <Layers className="w-4 h-4" />
             <span>Classification & Tax Information</span>
           </div>
@@ -349,7 +339,7 @@ export const CustomerFormPage: React.FC = () => {
                 name="customerType"
                 value={formData.customerType}
                 onChange={handleChange}
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               >
                 <option value="RETAIL">Retail</option>
                 <option value="WHOLESALE">Wholesale</option>
@@ -366,7 +356,7 @@ export const CustomerFormPage: React.FC = () => {
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               >
                 <option value="LEAD">Lead (Prospective)</option>
                 <option value="ACTIVE">Active (Verified Account)</option>
@@ -385,7 +375,7 @@ export const CustomerFormPage: React.FC = () => {
                 value={formData.gstNumber || ''}
                 onChange={handleChange}
                 placeholder="27AABCU9603R1ZM"
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono uppercase text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono uppercase text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -393,7 +383,7 @@ export const CustomerFormPage: React.FC = () => {
 
         {/* Card 3: Address & CRM Follow-up */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-cyan-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <MapPin className="w-4 h-4" />
             <span>Address & Follow-up Details</span>
           </div>
@@ -413,7 +403,7 @@ export const CustomerFormPage: React.FC = () => {
                 className={`w-full bg-slate-950/80 border rounded-xl p-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                   errors.address
                     ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                    : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                 }`}
               />
               {errors.address && <p className="text-[11px] text-rose-400">{errors.address}</p>}
@@ -432,7 +422,7 @@ export const CustomerFormPage: React.FC = () => {
                     name="followUpDate"
                     value={formData.followUpDate || ''}
                     onChange={handleChange}
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
               </div>
@@ -450,7 +440,7 @@ export const CustomerFormPage: React.FC = () => {
                     value={formData.notes || ''}
                     onChange={handleChange}
                     placeholder="Preferred shipping days, credit terms, sales interaction notes..."
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   />
                 </div>
               </div>
@@ -471,7 +461,7 @@ export const CustomerFormPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:from-emerald-700 active:to-teal-700 text-white text-xs font-bold shadow-lg shadow-emerald-950/60 transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-950 transition-all cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

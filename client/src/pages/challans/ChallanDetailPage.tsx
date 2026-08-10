@@ -6,24 +6,22 @@ import {
   Edit3, 
   CheckCircle2, 
   XCircle, 
-  Clock, 
-  AlertCircle, 
   Building2, 
   Phone, 
   Mail, 
   MapPin, 
   UserCheck, 
   PackageCheck, 
-  ShieldAlert,
-  AlertTriangle,
-  X,
-  Layers,
-  Sparkles,
-  Boxes
+  ShieldAlert, 
+  Layers
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { challanService } from '../../services/challanService';
-import { Challan, ChallanStatus } from '../../types';
+import { Challan } from '../../types';
+import { StatusBadge } from '../../components/common/StatusBadge';
+import { AlertBanner } from '../../components/common/AlertBanner';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export const ChallanDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -126,38 +124,10 @@ export const ChallanDetailPage: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: ChallanStatus) => {
-    switch (status) {
-      case 'CONFIRMED':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-sm">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            CONFIRMED
-          </span>
-        );
-      case 'DRAFT':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
-            <Clock className="w-3.5 h-3.5" />
-            DRAFT
-          </span>
-        );
-      case 'CANCELLED':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
-            <XCircle className="w-3.5 h-3.5" />
-            CANCELLED
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 space-y-3">
-        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
         <span className="text-xs font-mono">Loading sales challan details...</span>
       </div>
     );
@@ -166,11 +136,10 @@ export const ChallanDetailPage: React.FC = () => {
   if (errorMessage || !challan) {
     return (
       <div className="max-w-xl mx-auto p-6 bg-slate-900 border border-slate-800 rounded-2xl text-center space-y-4">
-        <AlertCircle className="w-12 h-12 text-rose-400 mx-auto" />
-        <h3 className="text-base font-bold text-slate-100">{errorMessage || 'Sales challan not found'}</h3>
+        <AlertBanner type="error" message={errorMessage || 'Sales challan not found'} />
         <button
           onClick={() => navigate('/challans')}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold text-slate-200 hover:bg-slate-700"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold text-slate-200 hover:bg-slate-700 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Challans</span>
@@ -208,7 +177,10 @@ export const ChallanDetailPage: React.FC = () => {
           {canManageChallans && challan.status === 'DRAFT' && (
             <>
               <button
-                onClick={() => setIsCancelModalOpen(true)}
+                onClick={() => {
+                  setCancelError('');
+                  setIsCancelModalOpen(true);
+                }}
                 className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-rose-950/40 hover:text-rose-300 border border-slate-800 text-slate-300 text-xs font-semibold transition-all cursor-pointer"
               >
                 Cancel Draft
@@ -223,8 +195,11 @@ export const ChallanDetailPage: React.FC = () => {
               </button>
 
               <button
-                onClick={() => setIsConfirmModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-950/60 transition-all cursor-pointer"
+                onClick={() => {
+                  setConfirmError('');
+                  setIsConfirmModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-950 transition-all cursor-pointer"
               >
                 <PackageCheck className="w-4 h-4" />
                 <span>Confirm Challan</span>
@@ -236,24 +211,25 @@ export const ChallanDetailPage: React.FC = () => {
 
       {/* Success Notification Banner */}
       {actionSuccessMessage && (
-        <div className="p-4 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center gap-2.5 animate-fadeIn shadow-xl">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="font-medium">{actionSuccessMessage}</span>
-        </div>
+        <AlertBanner
+          type="success"
+          message={actionSuccessMessage}
+          onClose={() => setActionSuccessMessage('')}
+        />
       )}
 
       {/* Header Banner */}
       <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-emerald-950 shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-indigo-950 shrink-0">
             <FileText className="w-7 h-7" />
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight font-mono">
+              <h2 className="text-2xl font-bold text-slate-100 tracking-tight font-mono">
                 {challan.challanNumber}
               </h2>
-              {getStatusBadge(challan.status)}
+              <StatusBadge type="challan" value={challan.status} />
             </div>
             <div className="flex items-center gap-2 text-slate-400 text-xs">
               <Building2 className="w-3.5 h-3.5 text-slate-500" />
@@ -268,18 +244,14 @@ export const ChallanDetailPage: React.FC = () => {
           <div>
             <span className="text-slate-500 text-[10px] uppercase font-bold block">Authorized Staff</span>
             <div className="flex items-center gap-1.5 text-slate-200 mt-0.5">
-              <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <UserCheck className="w-3.5 h-3.5 text-indigo-400" />
               <span>{challan.user?.name || 'Sales Staff'}</span>
             </div>
           </div>
           <div>
             <span className="text-slate-500 text-[10px] uppercase font-bold block">Issue Date</span>
-            <span className="text-slate-300 font-mono text-[11px]">
-              {new Date(challan.createdAt).toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-              })}
+            <span className="text-slate-300 font-mono text-xs">
+              {formatDate(challan.createdAt)}
             </span>
           </div>
         </div>
@@ -312,7 +284,7 @@ export const ChallanDetailPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Customer Info Card */}
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <Building2 className="w-4 h-4" />
             <span>Customer Details</span>
           </div>
@@ -329,13 +301,13 @@ export const ChallanDetailPage: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 text-slate-300">
-              <Phone className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+              <Phone className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
               <span className="font-mono">{challan.customer?.mobile || '—'}</span>
             </div>
 
             {challan.customer?.email && (
               <div className="flex items-center gap-2 text-slate-300">
-                <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                 <span className="truncate">{challan.customer.email}</span>
               </div>
             )}
@@ -343,7 +315,7 @@ export const ChallanDetailPage: React.FC = () => {
             {challan.customer?.gstNumber && (
               <div>
                 <span className="text-slate-500 text-[10px] uppercase font-bold block">GST Identification</span>
-                <span className="font-mono text-emerald-400 font-semibold">{challan.customer.gstNumber}</span>
+                <span className="font-mono text-indigo-300 font-semibold">{challan.customer.gstNumber}</span>
               </div>
             )}
 
@@ -351,7 +323,7 @@ export const ChallanDetailPage: React.FC = () => {
               <span className="text-slate-500 text-[10px] uppercase font-bold flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-slate-400" /> Dispatch Destination
               </span>
-              <p className="text-slate-300 leading-relaxed text-[11px]">
+              <p className="text-slate-300 leading-relaxed text-xs">
                 {challan.customer?.address || 'Standard Registered Address'}
               </p>
             </div>
@@ -361,18 +333,18 @@ export const ChallanDetailPage: React.FC = () => {
         {/* Line Items Table (Spans 2 Cols) */}
         <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
               <Layers className="w-4 h-4" />
               <span>Dispatched Products (Historical Snapshots)</span>
             </div>
-            <span className="text-slate-500 font-mono text-[10px]">
+            <span className="text-slate-500 font-mono text-[11px]">
               {challan.items?.length || 0} Line Items
             </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="text-slate-500 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+              <thead className="text-slate-500 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-800">
                 <tr>
                   <th className="pb-3">Product Name</th>
                   <th className="pb-3 px-3">SKU</th>
@@ -393,14 +365,14 @@ export const ChallanDetailPage: React.FC = () => {
 
                       {/* SKU Snapshot */}
                       <td className="py-3 px-3 font-mono">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-400 text-[10px] font-bold">
+                        <span className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-400 text-[11px] font-bold">
                           {item.skuSnapshot}
                         </span>
                       </td>
 
                       {/* Unit Price Snapshot */}
                       <td className="py-3 px-3 text-right font-mono text-slate-300">
-                        ₹{Number(item.unitPriceSnapshot).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        {formatCurrency(item.unitPriceSnapshot)}
                       </td>
 
                       {/* Quantity */}
@@ -410,7 +382,7 @@ export const ChallanDetailPage: React.FC = () => {
 
                       {/* Subtotal */}
                       <td className="py-3 text-right pr-2 font-mono font-bold text-emerald-400">
-                        ₹{lineSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        {formatCurrency(lineSubtotal)}
                       </td>
                     </tr>
                   );
@@ -424,7 +396,7 @@ export const ChallanDetailPage: React.FC = () => {
             <div className="flex items-center gap-4 text-slate-400">
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Total Units</span>
-                <span className="font-mono font-extrabold text-slate-200 text-base">
+                <span className="font-mono font-bold text-slate-200 text-base">
                   {challan.totalQuantity} Units
                 </span>
               </div>
@@ -432,8 +404,8 @@ export const ChallanDetailPage: React.FC = () => {
 
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-slate-500 block">Estimated Valuation</span>
-              <span className="font-mono font-extrabold text-emerald-400 text-lg">
-                ₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              <span className="font-mono font-bold text-emerald-400 text-lg">
+                {formatCurrency(totalAmount)}
               </span>
             </div>
           </div>
@@ -441,121 +413,32 @@ export const ChallanDetailPage: React.FC = () => {
       </div>
 
       {/* Confirmation Modal */}
-      {isConfirmModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                <PackageCheck className="w-5 h-5" />
-                <span>Confirm Sales Challan</span>
-              </div>
-              <button
-                onClick={() => setIsConfirmModalOpen(false)}
-                className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {confirmError && (
-              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <span>{confirmError}</span>
-              </div>
-            )}
-
-            <div className="text-xs text-slate-300 space-y-2 leading-relaxed">
-              <p>
-                Are you sure you want to confirm <strong className="text-slate-100 font-mono">{challan.challanNumber}</strong>?
-              </p>
-              <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-300 text-[11px] space-y-1">
-                <strong className="flex items-center gap-1 font-semibold">
-                  <AlertTriangle className="w-3.5 h-3.5" /> Irreversible Action
-                </strong>
-                <span>
-                  Confirming will immediately reduce warehouse stock by {challan.totalQuantity} units and generate Stock OUT ledger records.
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setIsConfirmModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmChallan}
-                disabled={isConfirming}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-950 cursor-pointer disabled:opacity-50"
-              >
-                {isConfirming ? (
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <span>Yes, Confirm & Deduct Stock</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={isConfirmModalOpen}
+        title="Confirm Sales Challan"
+        message={`Are you sure you want to confirm ${challan.challanNumber}? Confirming will immediately reduce warehouse stock by ${challan.totalQuantity} units and generate Stock OUT ledger movements. This action cannot be reversed.`}
+        confirmText="Yes, Confirm & Deduct Stock"
+        cancelText="Cancel"
+        variant="success"
+        isLoading={isConfirming}
+        error={confirmError}
+        onConfirm={handleConfirmChallan}
+        onClose={() => setIsConfirmModalOpen(false)}
+      />
 
       {/* Cancel Modal */}
-      {isCancelModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
-                <XCircle className="w-5 h-5" />
-                <span>Cancel Draft Challan</span>
-              </div>
-              <button
-                onClick={() => setIsCancelModalOpen(false)}
-                className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {cancelError && (
-              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <span>{cancelError}</span>
-              </div>
-            )}
-
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Are you sure you want to cancel draft <strong className="text-slate-100 font-mono">{challan.challanNumber}</strong>?
-              This challan will be marked as cancelled. No inventory stock will be modified.
-            </p>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setIsCancelModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold cursor-pointer"
-              >
-                Go Back
-              </button>
-              <button
-                type="button"
-                onClick={handleCancelChallan}
-                disabled={isCancelling}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-950 cursor-pointer disabled:opacity-50"
-              >
-                {isCancelling ? (
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <span>Yes, Cancel Draft</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={isCancelModalOpen}
+        title="Cancel Draft Challan"
+        message={`Are you sure you want to cancel draft ${challan.challanNumber}? This challan will be marked as cancelled. No inventory stock will be modified.`}
+        confirmText="Yes, Cancel Draft"
+        cancelText="Go Back"
+        variant="danger"
+        isLoading={isCancelling}
+        error={cancelError}
+        onConfirm={handleCancelChallan}
+        onClose={() => setIsCancelModalOpen(false)}
+      />
     </div>
   );
 };

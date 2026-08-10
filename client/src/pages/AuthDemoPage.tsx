@@ -10,11 +10,12 @@ import {
   XCircle, 
   Activity,
   Layers,
-  Terminal
+  Terminal,
+  ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { authService } from '../services/authService';
-import { Role } from '../types';
+import { StatusBadge } from '../components/common/StatusBadge';
 
 interface TestResult {
   endpoint: string;
@@ -73,43 +74,40 @@ export const AuthDemoPage: React.FC = () => {
     }
   };
 
-  const getRoleBadgeStyle = (role?: Role) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-      case 'SALES':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-      case 'WAREHOUSE':
-        return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
-      case 'ACCOUNTS':
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
-      default:
-        return 'bg-slate-800 text-slate-300 border-slate-700';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8 flex flex-col items-center">
       <div className="max-w-4xl w-full space-y-8">
         {/* Top Navbar */}
         <header className="flex items-center justify-between bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-4 sm:px-6 shadow-xl">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+              title="Return to Operations Dashboard"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
             <div>
               <h2 className="font-bold text-slate-100 text-base leading-none">NexaERP</h2>
-              <p className="text-[11px] text-slate-400 font-medium mt-1">Authentication & Role Access Demo</p>
+              <p className="text-xs text-slate-400 font-medium mt-1">Authentication & Role Access Demo Suite</p>
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-800/50 border border-slate-700 text-xs font-medium text-slate-300 transition-all cursor-pointer"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all cursor-pointer"
+            >
+              Go to Dashboard
+            </button>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-800/50 border border-slate-700 text-xs font-medium text-slate-300 transition-all cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </header>
 
         {/* User Card */}
@@ -117,7 +115,7 @@ export const AuthDemoPage: React.FC = () => {
           <div className="md:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-emerald-950">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-indigo-950">
                   <UserIcon className="w-6 h-6" />
                 </div>
                 <div>
@@ -125,18 +123,16 @@ export const AuthDemoPage: React.FC = () => {
                   <p className="text-xs text-slate-400">{user?.email}</p>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getRoleBadgeStyle(user?.role)}`}>
-                {user?.role} ROLE
-              </span>
+              {user?.role && <StatusBadge type="role" value={user.role} />}
             </div>
 
             <div className="pt-2 border-t border-slate-800/80 flex flex-wrap gap-4 text-xs text-slate-400">
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase">User ID</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">User ID</span>
                 <span className="font-mono text-slate-300">{user?.id}</span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px] uppercase">Session Status</span>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Session Status</span>
                 <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   JWT Authenticated
@@ -149,13 +145,13 @@ export const AuthDemoPage: React.FC = () => {
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-3">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                <KeyRound className="w-4 h-4 text-emerald-400" />
+                <KeyRound className="w-4 h-4 text-indigo-400" />
                 <span>Active Bearer Token</span>
               </div>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-xs text-slate-500">
                 Signed by backend with secret & role claims.
               </p>
-              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 font-mono text-[10px] text-emerald-400/90 break-all leading-tight max-h-16 overflow-y-auto">
+              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 font-mono text-[10px] text-indigo-300 break-all leading-tight max-h-16 overflow-y-auto">
                 {token ? `${token.slice(0, 45)}...` : 'No token'}
               </div>
             </div>
@@ -164,7 +160,7 @@ export const AuthDemoPage: React.FC = () => {
               disabled={testingRole === 'me'}
               className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              <Activity className="w-3.5 h-3.5 text-indigo-400" />
               <span>Verify Profile via /auth/me</span>
             </button>
           </div>
@@ -173,13 +169,13 @@ export const AuthDemoPage: React.FC = () => {
         {/* Role Access Testing Matrix */}
         <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-6">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
               <Layers className="w-4 h-4" />
               <span>Role-Based Authorization Testing Suite</span>
             </div>
             <h4 className="text-xl font-bold text-slate-100">Live Endpoint Permission Matrix</h4>
             <p className="text-xs text-slate-400 max-w-2xl">
-              Click any button below to execute an authenticated request against the backend. The server will evaluate your JWT and return <span className="text-emerald-400 font-mono">200 OK</span> if your role is allowed, or <span className="text-rose-400 font-mono">403 Forbidden</span> if denied.
+              Click any button below to execute an authenticated request against the backend. The server will evaluate your JWT and return <span className="text-emerald-400 font-mono font-bold">200 OK</span> if your role is allowed, or <span className="text-rose-400 font-mono font-bold">403 Forbidden</span> if denied.
             </p>
           </div>
 
@@ -187,9 +183,9 @@ export const AuthDemoPage: React.FC = () => {
             <button
               onClick={() => runRoleTest('admin')}
               disabled={testingRole === 'admin'}
-              className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/15 text-left transition-all group cursor-pointer"
+              className="p-3.5 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/15 text-left transition-all group cursor-pointer"
             >
-              <div className="flex items-center justify-between text-emerald-400 text-xs font-bold mb-1">
+              <div className="flex items-center justify-between text-indigo-300 text-xs font-bold mb-1">
                 <span>ADMIN ROUTE</span>
                 <Send className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </div>
@@ -200,9 +196,9 @@ export const AuthDemoPage: React.FC = () => {
             <button
               onClick={() => runRoleTest('sales')}
               disabled={testingRole === 'sales'}
-              className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/15 text-left transition-all group cursor-pointer"
+              className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/15 text-left transition-all group cursor-pointer"
             >
-              <div className="flex items-center justify-between text-amber-400 text-xs font-bold mb-1">
+              <div className="flex items-center justify-between text-emerald-400 text-xs font-bold mb-1">
                 <span>SALES ROUTE</span>
                 <Send className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </div>
@@ -213,9 +209,9 @@ export const AuthDemoPage: React.FC = () => {
             <button
               onClick={() => runRoleTest('warehouse')}
               disabled={testingRole === 'warehouse'}
-              className="p-3.5 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/15 text-left transition-all group cursor-pointer"
+              className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/15 text-left transition-all group cursor-pointer"
             >
-              <div className="flex items-center justify-between text-indigo-400 text-xs font-bold mb-1">
+              <div className="flex items-center justify-between text-amber-400 text-xs font-bold mb-1">
                 <span>WAREHOUSE</span>
                 <Send className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </div>
@@ -245,7 +241,7 @@ export const AuthDemoPage: React.FC = () => {
                 <span>Live Server Response Console:</span>
               </span>
               {testResult && (
-                <span className="text-[11px] text-slate-500 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   Checked at {testResult.timestamp}
                 </span>
               )}
@@ -258,7 +254,7 @@ export const AuthDemoPage: React.FC = () => {
                     <span className="text-xs font-mono font-bold text-slate-200">
                       {testResult.endpoint}
                     </span>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-xs text-slate-500">
                       (Req: {testResult.roleRequired})
                     </span>
                   </div>
@@ -295,7 +291,7 @@ export const AuthDemoPage: React.FC = () => {
         </section>
 
         {/* Footer */}
-        <footer className="text-center text-xs text-slate-600">
+        <footer className="text-center text-xs text-slate-500">
           NexaERP Auth Checkpoint • Fully Connected to Supabase Database
         </footer>
       </div>

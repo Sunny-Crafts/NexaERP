@@ -4,12 +4,9 @@ import {
   Package, 
   ArrowLeft, 
   Save, 
-  AlertCircle, 
-  CheckCircle2, 
   Tag, 
   MapPin, 
   Boxes, 
-  Layers, 
   Sparkles,
   Info,
   Lock
@@ -17,6 +14,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { productService } from '../../services/productService';
 import { CreateProductInput } from '../../types';
+import { AlertBanner } from '../../components/common/AlertBanner';
 
 export const ProductFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -207,7 +205,7 @@ export const ProductFormPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 space-y-3">
-        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
         <span className="text-xs font-mono">Loading product specifications...</span>
       </div>
     );
@@ -226,14 +224,14 @@ export const ProductFormPage: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
           <span>{isEditMode ? 'Editing Mode' : 'New Product Registration'}</span>
         </div>
       </div>
 
       <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2.5">
-          <Package className="w-6 h-6 text-emerald-400" />
+        <h2 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
+          <Package className="w-6 h-6 text-indigo-400" />
           <span>{isEditMode ? 'Edit Product Specifications' : 'Register New Product'}</span>
         </h2>
         <p className="text-xs text-slate-400">
@@ -245,27 +243,18 @@ export const ProductFormPage: React.FC = () => {
 
       {/* Alert Banner */}
       {statusBanner && (
-        <div
-          className={`p-4 rounded-xl text-xs flex items-start gap-3 border animate-fadeIn ${
-            statusBanner.type === 'success'
-              ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-              : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-          }`}
-        >
-          {statusBanner.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-          )}
-          <span className="leading-relaxed font-medium">{statusBanner.message}</span>
-        </div>
+        <AlertBanner
+          type={statusBanner.type}
+          message={statusBanner.message}
+          onClose={() => setStatusBanner(null)}
+        />
       )}
 
       {/* Form Container */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Card 1: Product Identification */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <Tag className="w-4 h-4" />
             <span>Product Identification & Classification</span>
           </div>
@@ -285,7 +274,7 @@ export const ProductFormPage: React.FC = () => {
                 className={`w-full bg-slate-950/80 border rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                   errors.name
                     ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                    : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                 }`}
               />
               {errors.name && <p className="text-[11px] text-rose-400">{errors.name}</p>}
@@ -305,7 +294,7 @@ export const ProductFormPage: React.FC = () => {
                 className={`w-full bg-slate-950/80 border rounded-xl px-3.5 py-2.5 text-xs font-mono uppercase text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                   errors.sku
                     ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                    : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                 }`}
               />
               {errors.sku && <p className="text-[11px] text-rose-400">{errors.sku}</p>}
@@ -327,7 +316,7 @@ export const ProductFormPage: React.FC = () => {
                   className={`w-full bg-slate-950/80 border rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                     errors.category
                       ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                      : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                   }`}
                 />
                 <datalist id="category-suggestions">
@@ -343,7 +332,7 @@ export const ProductFormPage: React.FC = () => {
 
         {/* Card 2: Pricing & Warehouse Logistics */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-teal-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <MapPin className="w-4 h-4" />
             <span>Pricing & Warehouse Storage Location</span>
           </div>
@@ -369,7 +358,7 @@ export const ProductFormPage: React.FC = () => {
                   className={`w-full bg-slate-950/80 border rounded-xl pl-8 pr-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                     errors.unitPrice
                       ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                      : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                   }`}
                 />
               </div>
@@ -392,7 +381,7 @@ export const ProductFormPage: React.FC = () => {
                   className={`w-full bg-slate-950/80 border rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                     errors.warehouseLocation
                       ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                      : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                      : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                   }`}
                 />
               </div>
@@ -405,7 +394,7 @@ export const ProductFormPage: React.FC = () => {
 
         {/* Card 3: Stock Thresholds & Initial Balance */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-cyan-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <Boxes className="w-4 h-4" />
             <span>Stock Balances & Reorder Thresholds</span>
           </div>
@@ -426,7 +415,7 @@ export const ProductFormPage: React.FC = () => {
                 className={`w-full bg-slate-950/80 border rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 transition-colors ${
                   errors.minimumStock
                     ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-800 focus:border-emerald-500 focus:ring-emerald-500'
+                    : 'border-slate-800 focus:border-indigo-500 focus:ring-indigo-500'
                 }`}
               />
               <p className="text-[10px] text-slate-500">
@@ -450,7 +439,7 @@ export const ProductFormPage: React.FC = () => {
                 <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs font-mono">
                   <span className="font-bold text-slate-100 text-sm">{formData.currentStock} Units</span>
                   <span className="text-[10px] text-slate-400 font-sans flex items-center gap-1">
-                    <Info className="w-3 h-3 text-cyan-400" /> Managed via Inventory
+                    <Info className="w-3 h-3 text-indigo-400" /> Managed via Inventory
                   </span>
                 </div>
               ) : (
@@ -461,7 +450,7 @@ export const ProductFormPage: React.FC = () => {
                   value={formData.currentStock}
                   onChange={handleChange}
                   placeholder="0"
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
               )}
               <p className="text-[10px] text-slate-500">
@@ -486,7 +475,7 @@ export const ProductFormPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:from-emerald-700 active:to-teal-700 text-white text-xs font-bold shadow-lg shadow-emerald-950/60 transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-950 transition-all cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

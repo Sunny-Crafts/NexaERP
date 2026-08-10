@@ -11,8 +11,6 @@ import {
   MapPin, 
   Calendar, 
   Clock, 
-  AlertCircle, 
-  CheckCircle2, 
   UserCheck, 
   FileText, 
   Layers, 
@@ -22,7 +20,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { customerService } from '../../services/customerService';
-import { Customer, CustomerFollowUp, CustomerStatus, CustomerType } from '../../types';
+import { Customer, CustomerFollowUp } from '../../types';
+import { StatusBadge } from '../../components/common/StatusBadge';
+import { AlertBanner } from '../../components/common/AlertBanner';
+import { formatDate } from '../../utils/formatters';
 
 export const CustomerDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -109,62 +110,10 @@ export const CustomerDetailPage: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: CustomerStatus) => {
-    switch (status) {
-      case 'ACTIVE':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Active Account
-          </span>
-        );
-      case 'LEAD':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-            <Clock className="w-3.5 h-3.5" />
-            Prospective Lead
-          </span>
-        );
-      case 'INACTIVE':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-            Inactive
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const getTypeBadge = (type: CustomerType) => {
-    switch (type) {
-      case 'DISTRIBUTOR':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-            DISTRIBUTOR
-          </span>
-        );
-      case 'WHOLESALE':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
-            WHOLESALE
-          </span>
-        );
-      case 'RETAIL':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
-            RETAIL
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 space-y-3">
-        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
         <span className="text-xs font-mono">Loading customer profile...</span>
       </div>
     );
@@ -173,11 +122,10 @@ export const CustomerDetailPage: React.FC = () => {
   if (errorMessage || !customer) {
     return (
       <div className="max-w-xl mx-auto p-6 bg-slate-900 border border-slate-800 rounded-2xl text-center space-y-4">
-        <AlertCircle className="w-12 h-12 text-rose-400 mx-auto" />
-        <h3 className="text-base font-bold text-slate-100">{errorMessage || 'Customer not found'}</h3>
+        <AlertBanner type="error" message={errorMessage || 'Customer profile not found'} />
         <button
           onClick={() => navigate('/customers')}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold text-slate-200 hover:bg-slate-700"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold text-slate-200 hover:bg-slate-700 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Directory</span>
@@ -212,13 +160,13 @@ export const CustomerDetailPage: React.FC = () => {
                 onClick={() => setIsFollowUpModalOpen(true)}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition-all cursor-pointer shadow-sm"
               >
-                <PlusCircle className="w-4 h-4 text-teal-400" />
+                <PlusCircle className="w-4 h-4 text-indigo-400" />
                 <span>Add Follow-up</span>
               </button>
 
               <button
                 onClick={() => navigate(`/customers/${customer.id}/edit`)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-emerald-950/60"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold transition-all cursor-pointer shadow-md shadow-indigo-950"
               >
                 <Edit3 className="w-4 h-4" />
                 <span>Edit Profile</span>
@@ -230,25 +178,28 @@ export const CustomerDetailPage: React.FC = () => {
 
       {/* Success Toast */}
       {successToast && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs flex items-center gap-2 animate-fadeIn shadow-lg">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{successToast}</span>
-        </div>
+        <AlertBanner
+          type="success"
+          message={successToast}
+          onClose={() => setSuccessToast('')}
+        />
       )}
 
       {/* Customer Header Banner */}
       <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-emerald-950 shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-indigo-950 shrink-0">
             {customer.name.charAt(0)}
           </div>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight">
+              <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
                 {customer.name}
               </h2>
-              {getStatusBadge(customer.status)}
-              {getTypeBadge(customer.customerType)}
+              <StatusBadge type="customer" value={customer.status} />
+              <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                {customer.customerType}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-slate-400 text-xs">
               <Building2 className="w-3.5 h-3.5 text-slate-500" />
@@ -265,17 +216,13 @@ export const CustomerDetailPage: React.FC = () => {
 
         <div className="flex items-center gap-6 border-t md:border-t-0 md:border-l border-slate-800 pt-4 md:pt-0 md:pl-6 text-xs text-slate-400">
           <div>
-            <span className="text-slate-500 text-[10px] uppercase font-bold block">Customer ID</span>
-            <span className="font-mono text-slate-300 text-[11px]">{customer.id}</span>
+            <span className="text-slate-500 text-[10px] uppercase font-bold block">Account Code</span>
+            <span className="font-mono text-slate-300 text-[11px]">{customer.id.substring(0, 8)}...</span>
           </div>
           <div>
-            <span className="text-slate-500 text-[10px] uppercase font-bold block">Registered On</span>
+            <span className="text-slate-500 text-[10px] uppercase font-bold block">Customer Since</span>
             <span className="text-slate-300">
-              {new Date(customer.createdAt).toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-              })}
+              {formatDate(customer.createdAt)}
             </span>
           </div>
         </div>
@@ -287,15 +234,15 @@ export const CustomerDetailPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Contact & Address Card */}
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-5">
-            <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
               <Users className="w-4 h-4" />
-              <span>Contact & Geographic Information</span>
+              <span>Contact & Billing Details</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/60 space-y-1">
                 <span className="text-slate-500 text-[10px] font-bold uppercase flex items-center gap-1.5">
-                  <Phone className="w-3 h-3 text-emerald-400" />
+                  <Phone className="w-3 h-3 text-indigo-400" />
                   <span>Mobile Phone</span>
                 </span>
                 <span className="font-mono text-slate-200 text-sm font-semibold">{customer.mobile}</span>
@@ -303,17 +250,17 @@ export const CustomerDetailPage: React.FC = () => {
 
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/60 space-y-1">
                 <span className="text-slate-500 text-[10px] font-bold uppercase flex items-center gap-1.5">
-                  <Mail className="w-3 h-3 text-teal-400" />
+                  <Mail className="w-3 h-3 text-indigo-400" />
                   <span>Email Address</span>
                 </span>
-                <span className="text-slate-200 text-sm font-semibold truncate block">{customer.email}</span>
+                <span className="text-slate-200 text-sm font-semibold truncate block">{customer.email || '—'}</span>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/60 space-y-1.5 text-xs">
               <span className="text-slate-500 text-[10px] font-bold uppercase flex items-center gap-1.5">
-                <MapPin className="w-3 h-3 text-cyan-400" />
-                <span>Registered Address</span>
+                <MapPin className="w-3 h-3 text-indigo-400" />
+                <span>Registered Delivery Address</span>
               </span>
               <p className="text-slate-300 leading-relaxed">{customer.address}</p>
             </div>
@@ -321,38 +268,29 @@ export const CustomerDetailPage: React.FC = () => {
 
           {/* CRM Notes & Schedule */}
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-5">
-            <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-teal-400 font-semibold text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
               <FileText className="w-4 h-4" />
-              <span>CRM Notes & Scheduled Interaction</span>
+              <span>CRM Follow-up Schedule</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/60 space-y-1">
                 <span className="text-slate-500 text-[10px] font-bold uppercase flex items-center gap-1.5">
-                  <Calendar className="w-3 h-3 text-teal-400" />
+                  <Calendar className="w-3 h-3 text-indigo-400" />
                   <span>Next Scheduled Follow-Up</span>
                 </span>
                 <span className="text-slate-200 font-medium">
-                  {customer.followUpDate ? (
-                    new Date(customer.followUpDate).toLocaleDateString('en-IN', {
-                      weekday: 'short',
-                      day: '2-digit',
-                      month: 'long',
-                      year: 'numeric'
-                    })
-                  ) : (
-                    <span className="text-slate-500">None scheduled</span>
-                  )}
+                  {customer.followUpDate ? formatDate(customer.followUpDate) : 'None scheduled'}
                 </span>
               </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/60 space-y-1">
                 <span className="text-slate-500 text-[10px] font-bold uppercase flex items-center gap-1.5">
-                  <Layers className="w-3 h-3 text-emerald-400" />
-                  <span>Tax & Compliance</span>
+                  <Layers className="w-3 h-3 text-indigo-400" />
+                  <span>GST Compliance</span>
                 </span>
                 <span className="font-mono text-slate-200">
-                  {customer.gstNumber ? customer.gstNumber : 'No GST provided'}
+                  {customer.gstNumber ? customer.gstNumber : 'Unregistered'}
                 </span>
               </div>
             </div>
@@ -370,7 +308,7 @@ export const CustomerDetailPage: React.FC = () => {
         <div className="space-y-6">
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-              <div className="flex items-center gap-2 text-cyan-400 font-semibold text-xs uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
                 <MessageSquare className="w-4 h-4" />
                 <span>Follow-up History</span>
               </div>
@@ -386,7 +324,7 @@ export const CustomerDetailPage: React.FC = () => {
                 {canEdit && (
                   <button
                     onClick={() => setIsFollowUpModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer pt-1"
+                    className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer pt-1"
                   >
                     <PlusCircle className="w-3.5 h-3.5" />
                     <span>Record first follow-up</span>
@@ -398,35 +336,24 @@ export const CustomerDetailPage: React.FC = () => {
                 {followUps.map((item) => (
                   <div key={item.id} className="relative pl-7 space-y-1.5 text-xs">
                     {/* Timeline Node */}
-                    <div className="absolute left-1.5 top-1 w-3.5 h-3.5 rounded-full bg-slate-900 border-2 border-emerald-400 -translate-x-1/2" />
+                    <div className="absolute left-1.5 top-1 w-3.5 h-3.5 rounded-full bg-slate-900 border-2 border-indigo-400 -translate-x-1/2" />
 
                     <div className="flex items-center justify-between text-[11px]">
                       <div className="flex items-center gap-1.5 font-semibold text-slate-300">
-                        <UserCheck className="w-3 h-3 text-emerald-400" />
-                        <span>{item.user?.name || 'Authorized Staff'}</span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono">
-                          {item.user?.role}
-                        </span>
+                        <UserCheck className="w-3 h-3 text-indigo-400" />
+                        <span>{item.user?.name || 'Staff'}</span>
+                        {item.user?.role && <StatusBadge type="role" value={item.user.role} />}
                       </div>
                       <span className="text-slate-500 font-mono text-[10px]">
-                        {new Date(item.createdAt).toLocaleDateString('en-IN', {
-                          day: '2-digit',
-                          month: 'short'
-                        })}
+                        {formatDate(item.createdAt)}
                       </span>
                     </div>
 
                     <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
                       <p className="text-slate-200 leading-relaxed whitespace-pre-wrap">{item.note}</p>
-                      <div className="flex items-center gap-1.5 text-[10px] text-teal-400 font-medium">
+                      <div className="flex items-center gap-1.5 text-[10px] text-indigo-300 font-medium">
                         <Calendar className="w-3 h-3" />
-                        <span>
-                          Target: {new Date(item.followUpDate).toLocaleDateString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </span>
+                        <span>Target: {formatDate(item.followUpDate)}</span>
                       </div>
                     </div>
                   </div>
@@ -442,23 +369,24 @@ export const CustomerDetailPage: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-fadeIn">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+              <div className="flex items-center gap-2 text-indigo-400 font-bold text-sm">
                 <MessageSquare className="w-4 h-4" />
                 <span>Record Customer Follow-up</span>
               </div>
               <button
                 onClick={() => setIsFollowUpModalOpen(false)}
-                className="text-slate-500 hover:text-slate-300 p-1 rounded-lg"
+                className="text-slate-500 hover:text-slate-300 p-1 rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {modalError && (
-              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                <span>{modalError}</span>
-              </div>
+              <AlertBanner
+                type="error"
+                message={modalError}
+                onClose={() => setModalError('')}
+              />
             )}
 
             <form onSubmit={handleAddFollowUp} className="space-y-4 text-xs">
@@ -471,7 +399,7 @@ export const CustomerDetailPage: React.FC = () => {
                   value={followUpDate}
                   onChange={(e) => setFollowUpDate(e.target.value)}
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -485,7 +413,7 @@ export const CustomerDetailPage: React.FC = () => {
                   onChange={(e) => setFollowUpNote(e.target.value)}
                   required
                   placeholder="Summarize conversation, discussed products, pricing offers, or customer concerns..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -500,7 +428,7 @@ export const CustomerDetailPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmittingFollowUp}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-950 cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-950 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingFollowUp ? (
                     <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

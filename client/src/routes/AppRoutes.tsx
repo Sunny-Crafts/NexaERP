@@ -25,7 +25,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
           <span className="text-xs font-mono">Verifying authentication session...</span>
         </div>
       </div>
@@ -46,7 +46,7 @@ export const AppRoutes: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
           <span className="text-xs font-mono">Loading NexaERP...</span>
         </div>
       </div>

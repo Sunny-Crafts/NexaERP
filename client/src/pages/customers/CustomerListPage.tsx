@@ -12,15 +12,14 @@ import {
   ChevronRight, 
   Eye, 
   Edit3, 
-  AlertCircle, 
-  Filter,
-  CheckCircle2,
-  Clock,
-  Briefcase
+  Filter
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { customerService } from '../../services/customerService';
-import { Customer, CustomerStatus, CustomerType, PaginationMeta } from '../../types';
+import { Customer, PaginationMeta } from '../../types';
+import { StatusBadge } from '../../components/common/StatusBadge';
+import { AlertBanner } from '../../components/common/AlertBanner';
+import { formatDate } from '../../utils/formatters';
 
 export const CustomerListPage: React.FC = () => {
   const { hasRole } = useAuth();
@@ -66,7 +65,7 @@ export const CustomerListPage: React.FC = () => {
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
-        setErrorMessage('Failed to load customers');
+        setErrorMessage('Failed to load customer directory');
       }
     } finally {
       setIsLoading(false);
@@ -88,65 +87,13 @@ export const CustomerListPage: React.FC = () => {
     return cust.status === statusFilter;
   });
 
-  const getStatusBadge = (status: CustomerStatus) => {
-    switch (status) {
-      case 'ACTIVE':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <CheckCircle2 className="w-3 h-3" />
-            Active
-          </span>
-        );
-      case 'LEAD':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-            <Clock className="w-3 h-3" />
-            Lead
-          </span>
-        );
-      case 'INACTIVE':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-            Inactive
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const getTypeBadge = (type: CustomerType) => {
-    switch (type) {
-      case 'DISTRIBUTOR':
-        return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-            Distributor
-          </span>
-        );
-      case 'WHOLESALE':
-        return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
-            Wholesale
-          </span>
-        );
-      case 'RETAIL':
-        return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
-            Retail
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Header section with Stats & Add CTA */}
+      {/* Header section with Add CTA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2.5">
-            <Users className="w-7 h-7 text-emerald-400" />
+          <h2 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
+            <Users className="w-6 h-6 text-indigo-400" />
             <span>Customer Directory</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
@@ -157,10 +104,10 @@ export const CustomerListPage: React.FC = () => {
         {canEdit && (
           <button
             onClick={() => navigate('/customers/new')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:from-emerald-700 active:to-teal-700 text-white text-xs font-bold shadow-lg shadow-emerald-950/50 transition-all cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-950 transition-all cursor-pointer shrink-0"
           >
             <UserPlus className="w-4 h-4" />
-            <span>Create New Customer</span>
+            <span>+ Create Customer</span>
           </button>
         )}
       </div>
@@ -175,7 +122,7 @@ export const CustomerListPage: React.FC = () => {
             placeholder="Search by customer name, mobile, business name, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
           />
           {searchTerm && (
             <button
@@ -196,7 +143,7 @@ export const CustomerListPage: React.FC = () => {
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 statusFilter === status
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -208,25 +155,18 @@ export const CustomerListPage: React.FC = () => {
 
       {/* Error state */}
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-          <button
-            onClick={fetchCustomers}
-            className="px-3 py-1 bg-rose-900/60 hover:bg-rose-900 rounded-lg text-rose-200 font-semibold"
-          >
-            Retry
-          </button>
-        </div>
+        <AlertBanner
+          type="error"
+          message={errorMessage}
+          onRetry={fetchCustomers}
+        />
       )}
 
       {/* Table Card */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+            <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3.5 px-4 sm:px-6">Customer & Business</th>
                 <th className="py-3.5 px-4">Contact Info</th>
@@ -277,7 +217,7 @@ export const CustomerListPage: React.FC = () => {
                     {canEdit && !searchTerm && (
                       <button
                         onClick={() => navigate('/customers/new')}
-                        className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
+                        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold cursor-pointer"
                       >
                         <UserPlus className="w-3.5 h-3.5" />
                         <span>Add First Customer</span>
@@ -294,49 +234,45 @@ export const CustomerListPage: React.FC = () => {
                   >
                     {/* Customer & Business */}
                     <td className="py-3.5 px-4 sm:px-6">
-                      <div className="font-bold text-slate-100 text-sm group-hover:text-emerald-400 transition-colors">
+                      <div className="font-bold text-slate-100 text-sm group-hover:text-indigo-400 transition-colors">
                         {customer.name}
                       </div>
                       <div className="flex items-center gap-1.5 text-slate-400 text-xs mt-0.5">
                         <Building2 className="w-3 h-3 text-slate-500 shrink-0" />
-                        <span className="truncate max-w-[180px]">{customer.businessName}</span>
+                        <span className="truncate max-w-[180px]">{customer.businessName || 'Individual'}</span>
                       </div>
                     </td>
 
                     {/* Contact */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 text-slate-300 font-mono text-xs">
-                        <Phone className="w-3 h-3 text-emerald-400/80 shrink-0" />
+                        <Phone className="w-3 h-3 text-slate-500 shrink-0" />
                         <span>{customer.mobile}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-slate-400 text-xs mt-0.5">
                         <Mail className="w-3 h-3 text-slate-500 shrink-0" />
-                        <span className="truncate max-w-[160px]">{customer.email}</span>
+                        <span className="truncate max-w-[160px]">{customer.email || '—'}</span>
                       </div>
                     </td>
 
                     {/* Type */}
                     <td className="py-3.5 px-4">
-                      {getTypeBadge(customer.customerType)}
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                        {customer.customerType}
+                      </span>
                     </td>
 
                     {/* Status */}
                     <td className="py-3.5 px-4">
-                      {getStatusBadge(customer.status)}
+                      <StatusBadge type="customer" value={customer.status} />
                     </td>
 
                     {/* Follow Up */}
                     <td className="py-3.5 px-4">
                       {customer.followUpDate ? (
                         <div className="flex items-center gap-1.5 text-slate-300 text-xs">
-                          <Calendar className="w-3 h-3 text-teal-400 shrink-0" />
-                          <span>
-                            {new Date(customer.followUpDate).toLocaleDateString('en-IN', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </span>
+                          <Calendar className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <span>{formatDate(customer.followUpDate)}</span>
                         </div>
                       ) : (
                         <span className="text-slate-600 text-xs font-mono">—</span>
@@ -349,7 +285,7 @@ export const CustomerListPage: React.FC = () => {
                         <button
                           onClick={() => navigate(`/customers/${customer.id}`)}
                           className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
-                          title="View Customer Profile"
+                          title="View Profile"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
@@ -357,7 +293,7 @@ export const CustomerListPage: React.FC = () => {
                         {canEdit && (
                           <button
                             onClick={() => navigate(`/customers/${customer.id}/edit`)}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-emerald-950/60 hover:text-emerald-300 hover:border-emerald-700/50 border border-transparent text-slate-300 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
                             title="Edit Customer"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -396,7 +332,7 @@ export const CustomerListPage: React.FC = () => {
                   onClick={() => handlePageChange(p)}
                   className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
                     pagination.page === p
-                      ? 'bg-emerald-600 text-white shadow-sm'
+                      ? 'bg-indigo-600 text-white shadow-sm'
                       : 'border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                   }`}
                 >

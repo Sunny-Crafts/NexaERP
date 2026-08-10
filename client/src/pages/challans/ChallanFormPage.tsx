@@ -6,13 +6,10 @@ import {
   Save, 
   Plus, 
   Trash2, 
-  AlertCircle, 
-  CheckCircle2, 
   Building2, 
   Package, 
   Sparkles,
   AlertTriangle,
-  Layers,
   Boxes
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -20,6 +17,8 @@ import { challanService } from '../../services/challanService';
 import { customerService } from '../../services/customerService';
 import { productService } from '../../services/productService';
 import { Customer, Product, ChallanItemInput } from '../../types';
+import { AlertBanner } from '../../components/common/AlertBanner';
+import { formatCurrency } from '../../utils/formatters';
 
 interface LineItemRow extends ChallanItemInput {
   tempId: string;
@@ -84,7 +83,6 @@ export const ChallanFormPage: React.FC = () => {
             );
           }
         } else {
-          // Initialize with first customer and one empty line item if available
           if (custRes.customers.length > 0) {
             setSelectedCustomerId(custRes.customers[0].id);
           }
@@ -101,7 +99,7 @@ export const ChallanFormPage: React.FC = () => {
       } catch (err: unknown) {
         setStatusBanner({
           type: 'error',
-          message: err instanceof Error ? err.message : 'Failed to initialize sales challan data'
+          message: err instanceof Error ? err.message : 'Failed to initialize sales challan form'
         });
       } finally {
         setIsLoading(false);
@@ -127,7 +125,7 @@ export const ChallanFormPage: React.FC = () => {
     if (lineItems.length <= 1) {
       setStatusBanner({
         type: 'error',
-        message: 'A sales challan must have at least one product item.'
+        message: 'A sales challan must contain at least one product item.'
       });
       return;
     }
@@ -222,7 +220,7 @@ export const ChallanFormPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-slate-400 space-y-3">
-        <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
         <span className="text-xs font-mono">Loading sales challan form...</span>
       </div>
     );
@@ -241,15 +239,15 @@ export const ChallanFormPage: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-          <span>{isEditMode ? 'Editing Draft Challan' : 'New Sales Draft'}</span>
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <span>{isEditMode ? 'Editing Draft' : 'New Sales Draft'}</span>
         </div>
       </div>
 
       <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2.5">
-          <FileText className="w-6 h-6 text-emerald-400" />
-          <span>{isEditMode ? 'Edit Sales Challan Draft' : 'Create Sales Challan Draft'}</span>
+        <h2 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
+          <FileText className="w-6 h-6 text-indigo-400" />
+          <span>{isEditMode ? 'Edit Sales Challan Draft' : 'Create Sales Challan'}</span>
         </h2>
         <p className="text-xs text-slate-400">
           Drafting a challan captures product snapshots without modifying warehouse balances. Stock reduction occurs during final confirmation.
@@ -258,41 +256,32 @@ export const ChallanFormPage: React.FC = () => {
 
       {/* Alert Banner */}
       {statusBanner && (
-        <div
-          className={`p-4 rounded-xl text-xs flex items-start gap-3 border animate-fadeIn ${
-            statusBanner.type === 'success'
-              ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-              : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-          }`}
-        >
-          {statusBanner.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-          )}
-          <span className="leading-relaxed font-medium">{statusBanner.message}</span>
-        </div>
+        <AlertBanner
+          type={statusBanner.type}
+          message={statusBanner.message}
+          onClose={() => setStatusBanner(null)}
+        />
       )}
 
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Customer Select Card */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
+          <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
             <Building2 className="w-4 h-4" />
-            <span>Select Customer Account</span>
+            <span>Customer Account</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-300 block">
-                Customer / Enterprise <span className="text-rose-400">*</span>
+                Select Customer <span className="text-rose-400">*</span>
               </label>
               <select
                 value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
                 required
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               >
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -303,12 +292,12 @@ export const ChallanFormPage: React.FC = () => {
             </div>
 
             {selectedCustomer && (
-              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/60 text-xs space-y-1 text-slate-400">
+              <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/60 text-xs space-y-1 text-slate-400">
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Billing Details</span>
                 <p className="font-semibold text-slate-200">{selectedCustomer.businessName || selectedCustomer.name}</p>
-                <p className="truncate text-[11px]">{selectedCustomer.address || 'Address on file'}</p>
+                <p className="truncate text-xs text-slate-400">{selectedCustomer.address || 'Address on file'}</p>
                 {selectedCustomer.gstNumber && (
-                  <span className="font-mono text-[10px] text-emerald-400">GST: {selectedCustomer.gstNumber}</span>
+                  <span className="font-mono text-xs text-indigo-300">GST: {selectedCustomer.gstNumber}</span>
                 )}
               </div>
             )}
@@ -318,30 +307,30 @@ export const ChallanFormPage: React.FC = () => {
         {/* Product Items Table Card */}
         <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
               <Package className="w-4 h-4" />
-              <span>Challan Product Line Items</span>
+              <span>Products</span>
             </div>
             <button
               type="button"
               onClick={handleAddLineItem}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold cursor-pointer transition-colors"
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Add Product Line</span>
+              <Plus className="w-3.5 h-3.5 text-indigo-400" />
+              <span>+ Add Product</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="text-slate-500 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+              <thead className="text-slate-500 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-800 bg-slate-950/40">
                 <tr>
-                  <th className="pb-3 w-1/2">Product Specification</th>
-                  <th className="pb-3 px-3">Available Stock</th>
-                  <th className="pb-3 px-3">Unit Price</th>
-                  <th className="pb-3 px-3">Quantity</th>
-                  <th className="pb-3 px-3">Subtotal</th>
-                  <th className="pb-3 text-right">Remove</th>
+                  <th className="py-2.5 px-3 w-1/2">Product</th>
+                  <th className="py-2.5 px-3">Available Stock</th>
+                  <th className="py-2.5 px-3">Price</th>
+                  <th className="py-2.5 px-3">Qty</th>
+                  <th className="py-2.5 px-3">Subtotal</th>
+                  <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -353,15 +342,15 @@ export const ChallanFormPage: React.FC = () => {
                   return (
                     <tr key={item.tempId} className="hover:bg-slate-950/40">
                       {/* Product Picker */}
-                      <td className="py-3 pr-4">
+                      <td className="py-3 px-3 pr-4">
                         <select
                           value={item.productId}
                           onChange={(e) => handleProductChange(index, e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
                         >
                           {products.map((p) => (
                             <option key={p.id} value={p.id}>
-                              {p.name} ({p.sku}) — ₹{Number(p.unitPrice).toFixed(2)}
+                              {p.name} ({p.sku}) — {formatCurrency(p.unitPrice)}
                             </option>
                           ))}
                         </select>
@@ -388,12 +377,12 @@ export const ChallanFormPage: React.FC = () => {
 
                       {/* Unit Price */}
                       <td className="py-3 px-3 font-mono text-slate-300">
-                        {prod ? `₹${Number(prod.unitPrice).toFixed(2)}` : '—'}
+                        {prod ? formatCurrency(prod.unitPrice) : '—'}
                       </td>
 
                       {/* Quantity */}
                       <td className="py-3 px-3">
-                        <div className="w-24">
+                        <div className="w-20">
                           <input
                             type="number"
                             min="1"
@@ -401,7 +390,7 @@ export const ChallanFormPage: React.FC = () => {
                             onChange={(e) =>
                               handleQuantityChange(index, parseInt(e.target.value, 10) || 1)
                             }
-                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-mono text-slate-100 text-center focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-mono text-slate-100 text-center focus:outline-none focus:border-indigo-500"
                           />
                         </div>
                         {isStockShortage && (
@@ -414,15 +403,16 @@ export const ChallanFormPage: React.FC = () => {
 
                       {/* Subtotal */}
                       <td className="py-3 px-3 font-mono font-bold text-slate-100">
-                        ₹{lineSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        {formatCurrency(lineSubtotal)}
                       </td>
 
                       {/* Remove Button */}
-                      <td className="py-3 text-right">
+                      <td className="py-3 px-3 text-right">
                         <button
                           type="button"
                           onClick={() => handleRemoveLineItem(index)}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
+                          title="Remove item"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -439,11 +429,11 @@ export const ChallanFormPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 bg-slate-900/50 border border-dashed border-slate-800 rounded-2xl p-5 text-xs text-slate-400 space-y-2">
             <span className="text-slate-300 font-bold flex items-center gap-1.5">
-              <Boxes className="w-4 h-4 text-cyan-400" />
+              <Boxes className="w-4 h-4 text-indigo-400" />
               <span>Inventory Reservation Notice</span>
             </span>
-            <p className="leading-relaxed text-[11px]">
-              Saving this form creates a <strong className="text-slate-200">DRAFT Challan</strong>. Stock quantities remain untouched until a Sales or Admin user performs the final confirmation step.
+            <p className="leading-relaxed text-xs">
+              Saving this form creates a <strong className="text-slate-200">DRAFT Challan</strong>. Stock quantities remain untouched until a Sales or Admin user executes the final confirmation step.
             </p>
           </div>
 
@@ -453,13 +443,13 @@ export const ChallanFormPage: React.FC = () => {
               <span className="font-mono font-bold text-slate-200">{lineItems.length}</span>
             </div>
             <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800">
-              <span>Total Units Dispatched</span>
+              <span>Total Quantity</span>
               <span className="font-mono font-bold text-slate-200">{totalUnits} Units</span>
             </div>
             <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
               <span className="font-bold text-slate-200">Estimated Total</span>
-              <span className="font-mono font-extrabold text-emerald-400 text-sm">
-                ₹{estimatedTotalValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              <span className="font-mono font-bold text-emerald-400 text-sm">
+                {formatCurrency(estimatedTotalValue)}
               </span>
             </div>
 
@@ -474,14 +464,14 @@ export const ChallanFormPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-1/2 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:from-emerald-700 active:to-teal-700 text-white text-xs font-bold shadow-lg shadow-emerald-950/60 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="w-1/2 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-950 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {isSubmitting ? (
                   <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
                     <Save className="w-3.5 h-3.5" />
-                    <span>{isEditMode ? 'Update Draft' : 'Save Draft'}</span>
+                    <span>{isEditMode ? 'Save Changes' : 'Save Draft'}</span>
                   </>
                 )}
               </button>

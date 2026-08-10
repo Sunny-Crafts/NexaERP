@@ -5,22 +5,20 @@ import {
   PlusCircle, 
   Search, 
   Filter, 
-  AlertTriangle, 
-  CheckCircle2, 
-  XCircle, 
   Eye, 
   Edit3, 
   ChevronLeft, 
   ChevronRight, 
-  AlertCircle, 
   MapPin, 
   Tag,
-  Boxes,
   Layers
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { productService } from '../../services/productService';
 import { Product, PaginationMeta } from '../../types';
+import { StatusBadge } from '../../components/common/StatusBadge';
+import { AlertBanner } from '../../components/common/AlertBanner';
+import { formatCurrency } from '../../utils/formatters';
 
 export const ProductListPage: React.FC = () => {
   const { hasRole } = useAuth();
@@ -84,7 +82,7 @@ export const ProductListPage: React.FC = () => {
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
-        setErrorMessage('Failed to load products');
+        setErrorMessage('Failed to load product catalog');
       }
     } finally {
       setIsLoading(false);
@@ -101,26 +99,10 @@ export const ProductListPage: React.FC = () => {
     }
   };
 
-  const getStockStatus = (current: number, min: number) => {
-    if (current === 0) {
-      return {
-        label: 'OUT OF STOCK',
-        className: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-        icon: <XCircle className="w-3 h-3 text-rose-400" />
-      };
-    }
-    if (current <= min) {
-      return {
-        label: 'LOW STOCK',
-        className: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-        icon: <AlertTriangle className="w-3 h-3 text-amber-400" />
-      };
-    }
-    return {
-      label: 'IN STOCK',
-      className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-      icon: <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-    };
+  const getStockStatusString = (current: number, min: number) => {
+    if (current === 0) return 'OUT OF STOCK';
+    if (current <= min) return 'LOW STOCK';
+    return 'IN STOCK';
   };
 
   return (
@@ -128,8 +110,8 @@ export const ProductListPage: React.FC = () => {
       {/* Header section with Stats & Add CTA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2.5">
-            <Package className="w-7 h-7 text-emerald-400" />
+          <h2 className="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
+            <Package className="w-6 h-6 text-indigo-400" />
             <span>Product Catalog</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
@@ -140,10 +122,10 @@ export const ProductListPage: React.FC = () => {
         {canManageProducts && (
           <button
             onClick={() => navigate('/products/new')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:from-emerald-700 active:to-teal-700 text-white text-xs font-bold shadow-lg shadow-emerald-950/50 transition-all cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-950 transition-all cursor-pointer shrink-0"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Create New Product</span>
+            <span>+ Create Product</span>
           </button>
         )}
       </div>
@@ -158,7 +140,7 @@ export const ProductListPage: React.FC = () => {
             placeholder="Search by product name, SKU, or category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+            className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
           />
           {searchTerm && (
             <button
@@ -201,7 +183,7 @@ export const ProductListPage: React.FC = () => {
                 }}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                   stockFilter === status
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -214,25 +196,18 @@ export const ProductListPage: React.FC = () => {
 
       {/* Error state */}
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-          <button
-            onClick={fetchProducts}
-            className="px-3 py-1 bg-rose-900/60 hover:bg-rose-900 rounded-lg text-rose-200 font-semibold"
-          >
-            Retry
-          </button>
-        </div>
+        <AlertBanner
+          type="error"
+          message={errorMessage}
+          onRetry={fetchProducts}
+        />
       )}
 
       {/* Table Card */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+            <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3.5 px-4 sm:px-6">Product & Category</th>
                 <th className="py-3.5 px-4">SKU</th>
@@ -287,7 +262,7 @@ export const ProductListPage: React.FC = () => {
                     {canManageProducts && !searchTerm && (
                       <button
                         onClick={() => navigate('/products/new')}
-                        className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold cursor-pointer"
+                        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold cursor-pointer"
                       >
                         <PlusCircle className="w-3.5 h-3.5" />
                         <span>Add First Product</span>
@@ -297,7 +272,7 @@ export const ProductListPage: React.FC = () => {
                 </tr>
               ) : (
                 products.map((product) => {
-                  const status = getStockStatus(product.currentStock, product.minimumStock);
+                  const stockStatusStr = getStockStatusString(product.currentStock, product.minimumStock);
                   return (
                     <tr
                       key={product.id}
@@ -306,7 +281,7 @@ export const ProductListPage: React.FC = () => {
                     >
                       {/* Product Name & Category */}
                       <td className="py-3.5 px-4 sm:px-6">
-                        <div className="font-bold text-slate-100 text-sm group-hover:text-emerald-400 transition-colors">
+                        <div className="font-bold text-slate-100 text-sm group-hover:text-indigo-400 transition-colors">
                           {product.name}
                         </div>
                         <div className="flex items-center gap-1.5 text-slate-400 text-xs mt-0.5">
@@ -324,7 +299,7 @@ export const ProductListPage: React.FC = () => {
 
                       {/* Unit Price */}
                       <td className="py-3.5 px-4 font-mono font-bold text-slate-200">
-                        ₹{Number(product.unitPrice).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        {formatCurrency(product.unitPrice)}
                       </td>
 
                       {/* Stock Levels */}
@@ -333,7 +308,7 @@ export const ProductListPage: React.FC = () => {
                           <span className="font-mono font-bold text-slate-100 text-sm">
                             {product.currentStock}
                           </span>
-                          <span className="text-[10px] text-slate-500">
+                          <span className="text-[11px] text-slate-500">
                             / min {product.minimumStock}
                           </span>
                         </div>
@@ -343,7 +318,7 @@ export const ProductListPage: React.FC = () => {
                       <td className="py-3.5 px-4">
                         {product.warehouseLocation ? (
                           <div className="flex items-center gap-1.5 text-slate-300 text-xs font-medium">
-                            <MapPin className="w-3 h-3 text-teal-400 shrink-0" />
+                            <MapPin className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                             <span>{product.warehouseLocation}</span>
                           </div>
                         ) : (
@@ -353,10 +328,7 @@ export const ProductListPage: React.FC = () => {
 
                       {/* Stock Status Badge */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${status.className}`}>
-                          {status.icon}
-                          <span>{status.label}</span>
-                        </span>
+                        <StatusBadge type="productStock" value={stockStatusStr} />
                       </td>
 
                       {/* Actions */}
@@ -373,7 +345,7 @@ export const ProductListPage: React.FC = () => {
                           {canManageProducts && (
                             <button
                               onClick={() => navigate(`/products/${product.id}/edit`)}
-                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-emerald-950/60 hover:text-emerald-300 hover:border-emerald-700/50 border border-transparent text-slate-300 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
                               title="Edit Product"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -413,7 +385,7 @@ export const ProductListPage: React.FC = () => {
                   onClick={() => handlePageChange(p)}
                   className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
                     pagination.page === p
-                      ? 'bg-emerald-600 text-white shadow-sm'
+                      ? 'bg-indigo-600 text-white shadow-sm'
                       : 'border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                   }`}
                 >
