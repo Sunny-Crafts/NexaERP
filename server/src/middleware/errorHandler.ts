@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendError } from '../utils/response';
+import { config } from '../config/env';
 
 export const errorHandler = (
   err: Error,
@@ -8,5 +9,12 @@ export const errorHandler = (
   _next: NextFunction
 ) => {
   console.error('Server error:', err);
-  return sendError(res, 'Internal Server Error', err.message, 500);
+  const isDev = config.nodeEnv === 'development';
+  // Avoid leaking raw database errors or stack details to clients in production
+  return sendError(
+    res,
+    'Internal Server Error',
+    isDev ? err.message : undefined,
+    500
+  );
 };
